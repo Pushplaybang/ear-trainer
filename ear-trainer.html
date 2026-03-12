@@ -797,7 +797,7 @@ function buildPiano(hsMap){
       k.addEventListener('click',()=>{
         playTone(noteFreq(note,o),getCtx().currentTime);
         k.classList.add('playing');setTimeout(()=>k.classList.remove('playing'),500);
-        if(qAns&&!qAnswered&&note!==qAns){qVisWrong++;updateScoreDisplay();}
+        if(qAns&&!qAnswered&&currentQuizMode!=='chords'&&note!==qAns){qVisWrong++;updateScoreDisplay();}
       });
       piano.appendChild(k);
     });
@@ -817,7 +817,7 @@ function buildPiano(hsMap){
         e.stopPropagation();
         playTone(noteFreq(bn,o),getCtx().currentTime);
         bk.classList.add('playing');setTimeout(()=>bk.classList.remove('playing'),500);
-        if(qAns&&!qAnswered&&bn!==qAns){qVisWrong++;updateScoreDisplay();}
+        if(qAns&&!qAnswered&&currentQuizMode!=='chords'&&bn!==qAns){qVisWrong++;updateScoreDisplay();}
       });
       bk.style.left=(wk.offsetLeft+29)+'px';piano.appendChild(bk);
     });
@@ -874,7 +874,7 @@ function buildFretSvg(svgEl,strings,numFrets,W,H,hsMap){
     hit.setAttribute('fill','transparent');hit.style.cursor='pointer';
     hit.addEventListener('click',()=>{
       playTone(freq,getCtx().currentTime);
-      if(qAns&&!qAnswered&&NOTES[pc]!==qAns){qVisWrong++;updateScoreDisplay();}
+      if(qAns&&!qAnswered&&currentQuizMode!=='chords'&&NOTES[pc]!==qAns){qVisWrong++;updateScoreDisplay();}
     });
     svgEl.appendChild(hit);
   });
