@@ -254,6 +254,8 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
 .step-text{font-size:.82rem;line-height:1.6;color:var(--text);}
 .app-footer{font-family:var(--font-b);font-size:.62rem;color:var(--muted);letter-spacing:.1em;text-align:center;padding:16px 0 8px;opacity:.55;}
 </style>
+</head>
+<body data-theme="current">
 
 <!-- SCORE OVERLAY -->
 <div class="modal-overlay" id="scoreOverlay">
@@ -660,7 +662,7 @@ function restoreSettings(){
     document.querySelectorAll('.quiz-mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===p.quizMode));
   }
   updateTuningVisibility();
-  if(p.theme) applyTheme(p.theme,true);
+  if(p.theme) applyTheme(p.theme,true); else applyTheme('current',true);
 }
 
 // ══ RANDOMISE ══
