@@ -602,7 +602,7 @@ function updateTarget(){
 
 // ══ PITCH DETECTION (autocorrelation YIN-lite) ══
 function autoCorrelate(buf,sampleRate){
-  const SIZE=buf.length,MAX_SAMPLES=Math.floor(SIZE/2);
+  const SIZE=buf.length;
   const rms=Math.sqrt(buf.reduce((s,x)=>s+x*x,0)/SIZE);
   if(rms<0.008)return -1;
   // Find first zero-crossing
@@ -610,9 +610,10 @@ function autoCorrelate(buf,sampleRate){
   for(let i=0;i<SIZE/2;i++){if(buf[i]<0){r1=i;break;}}
   for(let i=1;i<SIZE/2;i++){if(buf[SIZE-i]<0){r2=SIZE-i;break;}}
   const buf2=buf.slice(r1,r2);const size2=buf2.length;
+  const MAX_SAMPLES=Math.floor(size2/2);
   const c=new Float32Array(MAX_SAMPLES);
   for(let i=0;i<MAX_SAMPLES;i++){
-    for(let j=0;j<MAX_SAMPLES;j++) c[i]+=buf2[j]*buf2[j+i];
+    for(let j=0;j<Math.min(MAX_SAMPLES,size2-i);j++) c[i]+=buf2[j]*buf2[j+i];
   }
   let d=0;while(c[d]>c[d+1])d++;
   let maxC=-1,maxPos=-1;
