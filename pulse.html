@@ -955,11 +955,11 @@ function restoreSettings(){
     accentLevels=Array.from({length:beatsPerBar},(_,i)=>i===0?3:1);
   }
   // 4. Sound sliders
-  if(p.vol)         document.getElementById('volSlider').value=p.vol;
-  if(p.bright)      document.getElementById('brightSlider').value=p.bright;
-  if(p.env)         document.getElementById('envSlider').value=p.env;
-  if(p.accentBoost) document.getElementById('accentBoostSlider').value=p.accentBoost;
-  if(p.swing)       document.getElementById('swingSlider').value=p.swing;
+  if(p.vol != null)         document.getElementById('volSlider').value=p.vol;
+  if(p.bright != null)      document.getElementById('brightSlider').value=p.bright;
+  if(p.env != null)         document.getElementById('envSlider').value=p.env;
+  if(p.accentBoost != null) document.getElementById('accentBoostSlider').value=p.accentBoost;
+  if(p.swing != null)       document.getElementById('swingSlider').value=p.swing;
   // 5. Panel chips
   if(p.clickRate)   setClickRate(+p.clickRate);
   if(p.showArm!==undefined){
