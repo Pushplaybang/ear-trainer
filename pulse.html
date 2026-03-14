@@ -719,12 +719,21 @@ function advance(){
   const spb=(60/bpm)/rate;          // seconds per beat (click-rate adjusted)
   const sps=spb/subdivision;        // seconds per subdivision slot
 
-  // Swing: on even sub-divisions (1,3,5…) add a delay; compensate would happen naturally
-  // Simple lazy-swing: delay every ODD sub index within the beat
-  let extra=0;
-  if(subdivision>=2&&swing>0&&currentSubDiv%2===1) extra=sps*swing;
+  // Swing: redistribute time within each pair of subdivisions so the pair
+  // still sums to 2 * sps (no tempo change), e.g. (sps+extra) then (sps-extra).
+  let interval=sps;
+  if(subdivision>=2&&subdivision%2===0&&swing>0){
+    const extra=sps*swing;
+    if(currentSubDiv%2===0){
+      // First in pair: lengthen interval to the swung subdivision
+      interval=sps+extra;
+    } else {
+      // Second in pair: shorten interval back toward the grid
+      interval=sps-extra;
+    }
+  }
 
-  nextNoteTime+=sps+extra;
+  nextNoteTime+=interval;
   currentSubDiv++;
   if(currentSubDiv>=subdivision){currentSubDiv=0;currentBeatInBar++;if(currentBeatInBar>=beatsPerBar) currentBeatInBar=0;}
 }
