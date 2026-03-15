@@ -694,8 +694,13 @@ function detectLoop(){
   if(!micActive){return;}
   const buf=new Float32Array(analyser.fftSize);
   analyser.getFloatTimeDomainData(buf);
-  // Level meter RMS
-  const rms=Math.sqrt(buf.reduce((s,x)=>s+x*x,0)/buf.length);
+  // Level meter RMS (use a simple loop for performance on typed arrays)
+  let sumSquares=0;
+  for(let i=0;i<buf.length;i++){
+    const sample=buf[i];
+    sumSquares+=sample*sample;
+  }
+  const rms=Math.sqrt(sumSquares/buf.length);
   const lf=document.getElementById('levelFill');
   if(lf){
     lf.style.width=Math.min(100,Math.round(rms/0.3*100))+'%';
