@@ -748,7 +748,7 @@ function updateTunerDisplay(note,oct,freq,cents,autodetect,smoothed){
     document.getElementById('autodetectNote').textContent='Nearest: '+displayNote(note)+oct;
   }
   // Needle position uses smoothed value; colour and LED use raw cents
-  document.getElementById('meterNeedle').style.left=(50+(smoothed||cents))+'%';
+  document.getElementById('meterNeedle').style.left=(50+(smoothed ?? cents))+'%';
   const needle=document.getElementById('meterNeedle');
   const inTune=Math.abs(cents)<=2;
   if(inTune){needle.style.background='var(--cents-in)';needle.style.boxShadow='0 0 0 2px var(--meter-bg),0 0 12px var(--cents-in)';}
