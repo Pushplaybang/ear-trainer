@@ -776,6 +776,34 @@ function resizeCanvas(){
   }
 }
 
+let cachedClrAccent;
+let cachedClrCorrect;
+let cachedClrBorder;
+
+function updateTraceThemeColors(){
+  const cs = getComputedStyle(document.body);
+  cachedClrAccent = cs.getPropertyValue('--accent').trim();
+  cachedClrCorrect = cs.getPropertyValue('--correct').trim();
+  cachedClrBorder = cs.getPropertyValue('--border').trim();
+}
+
+const traceThemeObserver = new MutationObserver((mutationsList) => {
+  for (const mutation of mutationsList) {
+    if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+      updateTraceThemeColors();
+      break;
+    }
+  }
+});
+
+traceThemeObserver.observe(document.documentElement || document.body, {
+  attributes: true,
+  attributeFilter: ['data-theme']
+});
+
+// Initialize cached colors based on the current theme
+updateTraceThemeColors();
+
 function drawPitchTrace(){
   resizeCanvas();
   const dpr=window.devicePixelRatio||1;
@@ -789,10 +817,9 @@ function drawPitchTrace(){
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
 
-  const cs=getComputedStyle(document.body);
-  const clrAccent=cs.getPropertyValue('--accent').trim();
-  const clrCorrect=cs.getPropertyValue('--correct').trim();
-  const clrBorder=cs.getPropertyValue('--border').trim();
+  const clrAccent=cachedClrAccent;
+  const clrCorrect=cachedClrCorrect;
+  const clrBorder=cachedClrBorder;
 
   const yMid=H/2,pxPerCent=H/100;
 
