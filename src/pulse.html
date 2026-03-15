@@ -707,10 +707,10 @@ document.querySelectorAll('.preset-slot').forEach(btn=>{
   });
   btn.addEventListener('contextmenu',e=>{e.preventDefault();renameSlot(slot);});
   // Long-press on mobile
-  let lpTimer=null;
-  btn.addEventListener('touchstart',()=>{lpTimer=setTimeout(()=>{lpTimer='fired';renameSlot(slot);},600);},{passive:true});
+  let lpTimer=null, lpFired=false;
+  btn.addEventListener('touchstart',()=>{lpFired=false;lpTimer=setTimeout(()=>{lpFired=true;renameSlot(slot);},600);},{passive:true});
   btn.addEventListener('touchend',e=>{
-    if(lpTimer==='fired'){e.preventDefault();lpTimer=null;return;}
+    if(lpFired){e.preventDefault();lpFired=false;clearTimeout(lpTimer);lpTimer=null;return;}
     clearTimeout(lpTimer);lpTimer=null;
   });
   btn.addEventListener('touchmove',()=>{clearTimeout(lpTimer);lpTimer=null;},{passive:true});
