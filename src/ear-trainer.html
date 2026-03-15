@@ -265,6 +265,16 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
   .modal-card{padding:20px 16px;}
   .doc-body{overflow-y:auto;max-height:60vh;}
 }
+.timer-dur-row{display:flex;align-items:center;gap:10px;font-size:.72rem;color:var(--muted);font-family:var(--font-b);}
+.timer-dur-label{white-space:nowrap;}
+.timer-dur-btns{display:flex;gap:4px;flex-wrap:wrap;}
+.timer-dur-btn{font-family:var(--font-b);font-size:.65rem;letter-spacing:.05em;padding:5px 9px;border-radius:var(--br);border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;text-transform:none;line-height:1;}
+.timer-dur-btn:hover{border-color:var(--accent);color:var(--accent);}
+.timer-dur-btn.active{background:var(--accent);color:var(--pill-text);border-color:var(--accent);font-weight:700;}
+[data-theme="retro"] .timer-dur-btn,[data-theme="playful"] .timer-dur-btn{font-size:.78rem;}
+@media(max-width:600px){.timer-dur-btn{min-height:44px;padding:5px 11px;}}
+.session-empty{font-family:var(--font-b);font-size:.82rem;color:var(--muted);padding:24px 0;text-align:center;}
+.session-stats-text{font-family:var(--font-b);font-size:.8rem;color:var(--muted);margin-top:10px;text-align:center;letter-spacing:.04em;}
 </style>
 </head>
 <body data-theme="current">
@@ -285,6 +295,16 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
   </div>
 </div>
 
+<!-- SESSIONS OVERLAY -->
+<div class="modal-overlay" id="sessionsOverlay">
+  <div class="modal-card wide">
+    <button class="modal-close" onclick="closeModal('sessionsOverlay')">✕</button>
+    <div class="doc-header">📊 Session History</div>
+    <div class="doc-sub">Accuracy over recent sessions</div>
+    <div id="sessionsContent"></div>
+  </div>
+</div>
+
 <!-- PLAN OVERLAY -->
 <div class="modal-overlay" id="planOverlay">
   <div class="modal-card wide">
@@ -302,7 +322,7 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
       <div class="step"><div class="step-num">6</div><div class="step-text"><strong>Try Natural Minor (Root: A).</strong> A minor is the relative of C Major and sounds darker. Compare the two moods back to back.</div></div>
       <h3>Stage 3 — Expand Your Palette</h3>
       <div class="step"><div class="step-num">7</div><div class="step-text"><strong>Try Interval mode.</strong> You'll hear two notes and identify the interval between them. Start with Major or Pentatonic Major where intervals are distinct.</div></div>
-      <div class="step"><div class="step-num">8</div><div class="step-text"><strong>Turn on the 10s timer.</strong> A little pressure sharpens your instincts. Try to answer before the ring runs out — timeouts are learning moments.</div></div>
+      <div class="step"><div class="step-num">8</div><div class="step-text"><strong>Enable a timer (5–20s).</strong> A little pressure sharpens your instincts. Try to answer before the ring runs out — timeouts are learning moments.</div></div>
       <div class="step"><div class="step-num">9</div><div class="step-text"><strong>Try Pentatonic Minor (Root: A or E).</strong> The scale behind most rock and blues. Switch to Guitar or Bass to see the shapes on the fretboard.</div></div>
       <h3>Stage 4 — Fluency</h3>
       <div class="step"><div class="step-num">10</div><div class="step-text"><strong>Explore Chord mode.</strong> Identify chord qualities (major, minor, 7th, etc.) built from the current scale. Use Major or Natural Minor for the richest chord variety.</div></div>
@@ -320,7 +340,7 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
     <div class="doc-sub">Features &amp; functionality guide</div>
     <div class="doc-body">
       <h3>Configuration</h3>
-      <p><strong>Root Note</strong> sets the tonic. <strong>Scale / Mode</strong> selects from 15 scales. <strong>Octave</strong> shifts the register — Octave 4 contains Middle C. With Guitar, Bass, or Ukulele active, a <strong>Tuning</strong> selector appears with alternative tunings.</p>
+      <p><strong>Root Note</strong> sets the tonic. <strong>Scale / Mode</strong> selects from 15 scales. <strong>Octave</strong> shifts the register — Octave 4 contains Middle C. <strong>Range</strong> (1–3 Octaves) expands the note pool across additional octaves above the starting octave; the piano visualiser widens to match. With Guitar, Bass, or Ukulele active, a <strong>Tuning</strong> selector appears with alternative tunings.</p>
       <p>Press <span class="badge">▶ Play Scale</span> or <span class="badge">▼ Descending</span> to hear the scale. Clicking either button while the scale is already playing re-triggers it from the start. Use <span class="badge">⚄ Randomise</span> for a surprise combination — tuning is never randomised.</p>
       <h3>Visualiser</h3>
       <ul>
@@ -336,13 +356,14 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
         <li><strong>Intervals</strong> — Hear two notes and name the interval between them. A reference note (always different from the answer) is played first when the toggle is on. Options only include intervals that exist in your chosen scale.</li>
         <li><strong>Chords</strong> — Hear a chord built diatonically from the scale and identify its quality (major, minor, dominant 7th, etc.). All chord tones are highlighted on the visualiser after you answer.</li>
       </ul>
-      <h3>Toggles</h3>
+      <h3>Sound &amp; Timer</h3>
       <ul>
+        <li><strong>Sound</strong> — <em>Synth 1</em> (default: percussive noise burst + sine, bright), <em>Synth 2</em> (triangle + harmonic, classic), or <em>Synth 3</em> (warm organ-like sine with sub-octave).</li>
         <li><strong>Play reference first</strong> — Note Names: plays root. Intervals: plays the reference note before the mystery note. Not used in Chord mode.</li>
-        <li><strong>10s timer</strong> — Countdown ring turns red at 3 seconds. Timeouts count against accuracy.</li>
+        <li><strong>Timer</strong> — Off, 5s, 10s, 15s, or 20s. The countdown ring turns red at 3 seconds. Timeouts count against accuracy.</li>
       </ul>
       <h3>Score &amp; Reset</h3>
-      <p>The score row shows ✓ correct, ✗ wrong (including visualiser misclicks), ⏱ timeouts, and accuracy %. Pressing <span class="badge">✕ Reset</span> shows a summary then clears everything for a fresh start.</p>
+      <p>The score row shows ✓ correct, ✗ wrong (including visualiser misclicks), ⏱ timeouts, and accuracy %. Pressing <span class="badge">✕ Reset</span> shows a summary, saves the session to history, then clears everything for a fresh start. Press <span class="badge">📊</span> in the toolbar to view your session accuracy chart.</p>
       <h3>Settings are remembered</h3>
       <p>All settings — root, scale, octave, tuning, visualiser, quiz mode, theme, toggles — are saved in your browser automatically. No account needed.</p>
       <div class="tip">🎯 Use the <strong>Replay</strong> button if you missed the sound. Switch to Piano view while learning to connect sounds with the keyboard layout visually.</div>
@@ -353,6 +374,7 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
 <!-- THEME BAR -->
 <div class="theme-bar">
   <div class="bar-left">
+    <button class="bar-icon-btn" onclick="openSessionsOverlay()" title="Session history">📊</button>
     <button class="bar-icon-btn" onclick="openModal('planOverlay')" title="Progression plan">🎓</button>
     <button class="bar-icon-btn" onclick="openModal('helpOverlay')" title="Help & features">📖</button>
   </div>
@@ -391,7 +413,9 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
       <div class="control-group"><label>Root Note</label><select id="rootSelect"></select></div>
       <div class="control-group"><label>Scale / Mode</label><select id="scaleSelect"></select></div>
       <div class="control-group"><label>Octave</label><select id="octaveSelect"></select></div>
+      <div class="control-group"><label>Range</label><select id="rangeSelect"></select></div>
       <div class="control-group" id="tuningGroup" style="display:none"><label id="tuningLabel">Tuning</label><select id="tuningSelect"></select></div>
+      <div class="control-group"><label>Sound</label><select id="timbreSelect"><option value="piano">Synth 1</option><option value="synth">Synth 2</option><option value="soft">Synth 3</option></select></div>
     </div>
     <div class="actions">
       <button class="btn-primary" onclick="playScaleAsc()">▶ Play Scale</button>
@@ -443,7 +467,7 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
       <div class="quiz-feedback" id="quizFeedback"></div>
       <div class="toggles-row">
         <label class="toggle-label"><input type="checkbox" id="rootFirstToggle"><div class="toggle-track"><div class="toggle-thumb"></div></div>Play reference first</label>
-        <label class="toggle-label"><input type="checkbox" id="timerToggle"><div class="toggle-track"><div class="toggle-thumb"></div></div>10s timer</label>
+        <div class="timer-dur-row"><span class="timer-dur-label">Timer</span><div class="timer-dur-btns" id="timerDurBtns"><button class="timer-dur-btn active" data-dur="0">Off</button><button class="timer-dur-btn" data-dur="5">5s</button><button class="timer-dur-btn" data-dur="10">10s</button><button class="timer-dur-btn" data-dur="15">15s</button><button class="timer-dur-btn" data-dur="20">20s</button></div></div>
       </div>
       <hr class="divider">
       <div class="actions" style="justify-content:center">
@@ -559,18 +583,48 @@ function updateTuningVisibility(){
 }
 
 // ══ AUDIO ══
-let audioCtx=null;
+let audioCtx=null,currentTimbre='piano';
 function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx;}
 function playTone(f,t0,dur=0.75){
-  const ctx=getCtx(),osc=ctx.createOscillator(),g=ctx.createGain(),filt=ctx.createBiquadFilter();
-  filt.type='lowpass';filt.frequency.value=2800;osc.type='triangle';osc.frequency.setValueAtTime(f,t0);
-  g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.38,t0+0.015);
-  g.gain.exponentialRampToValueAtTime(0.18,t0+dur*.4);g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
-  const o2=ctx.createOscillator(),g2=ctx.createGain();
-  o2.type='sine';o2.frequency.setValueAtTime(f*2,t0);
-  g2.gain.setValueAtTime(0,t0);g2.gain.linearRampToValueAtTime(0.1,t0+0.01);g2.gain.exponentialRampToValueAtTime(0.001,t0+dur*.6);
-  o2.connect(g2);g2.connect(ctx.destination);o2.start(t0);o2.stop(t0+dur);
-  osc.connect(filt);filt.connect(g);g.connect(ctx.destination);osc.start(t0);osc.stop(t0+dur);
+  const ctx=getCtx();
+  if(currentTimbre==='piano'){
+    const bufLen=Math.ceil(ctx.sampleRate*0.01),buf=ctx.createBuffer(1,bufLen,ctx.sampleRate);
+    const d=buf.getChannelData(0);for(let i=0;i<bufLen;i++)d[i]=(Math.random()*2-1);
+    const ns=ctx.createBufferSource();ns.buffer=buf;
+    const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f;bp.Q.value=2;
+    const ng=ctx.createGain();
+    ng.gain.setValueAtTime(0,t0);ng.gain.linearRampToValueAtTime(0.5,t0+0.01);
+    ng.gain.exponentialRampToValueAtTime(0.15,t0+0.1);ng.gain.exponentialRampToValueAtTime(0.001,t0+0.5);
+    ns.connect(bp);bp.connect(ng);ng.connect(ctx.destination);ns.start(t0);
+    const osc=ctx.createOscillator(),g=ctx.createGain();
+    osc.type='sine';osc.frequency.setValueAtTime(f,t0);
+    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.28,t0+0.01);
+    g.gain.exponentialRampToValueAtTime(0.09,t0+0.1);g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+    osc.connect(g);g.connect(ctx.destination);osc.start(t0);osc.stop(t0+dur);
+  } else if(currentTimbre==='soft'){
+    const sustain=Math.max(dur,1.5),lp=ctx.createBiquadFilter();
+    lp.type='lowpass';lp.frequency.value=1200;lp.connect(ctx.destination);
+    const osc=ctx.createOscillator(),g=ctx.createGain();
+    osc.type='sine';osc.frequency.setValueAtTime(f,t0);
+    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.32,t0+0.04);
+    g.gain.setValueAtTime(0.32,t0+sustain*0.7);g.gain.exponentialRampToValueAtTime(0.001,t0+sustain);
+    osc.connect(g);g.connect(lp);osc.start(t0);osc.stop(t0+sustain+0.05);
+    const sub=ctx.createOscillator(),sg=ctx.createGain();
+    sub.type='sine';sub.frequency.setValueAtTime(f/2,t0);
+    sg.gain.setValueAtTime(0,t0);sg.gain.linearRampToValueAtTime(0.08,t0+0.04);
+    sg.gain.setValueAtTime(0.08,t0+sustain*0.7);sg.gain.exponentialRampToValueAtTime(0.001,t0+sustain);
+    sub.connect(sg);sg.connect(lp);sub.start(t0);sub.stop(t0+sustain+0.05);
+  } else {
+    const osc=ctx.createOscillator(),g=ctx.createGain(),filt=ctx.createBiquadFilter();
+    filt.type='lowpass';filt.frequency.value=2800;osc.type='triangle';osc.frequency.setValueAtTime(f,t0);
+    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.38,t0+0.015);
+    g.gain.exponentialRampToValueAtTime(0.18,t0+dur*.4);g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+    const o2=ctx.createOscillator(),g2=ctx.createGain();
+    o2.type='sine';o2.frequency.setValueAtTime(f*2,t0);
+    g2.gain.setValueAtTime(0,t0);g2.gain.linearRampToValueAtTime(0.1,t0+0.01);g2.gain.exponentialRampToValueAtTime(0.001,t0+dur*.6);
+    o2.connect(g2);g2.connect(ctx.destination);o2.start(t0);o2.stop(t0+dur);
+    osc.connect(filt);filt.connect(g);g.connect(ctx.destination);osc.start(t0);osc.stop(t0+dur);
+  }
 }
 function playChordFreqs(freqs){const t0=getCtx().currentTime;freqs.forEach(f=>playTone(f,t0,1.6));}
 
@@ -591,6 +645,13 @@ const SCALES={
   'Blues':[0,3,5,6,7,10,12],'Whole Tone':[0,2,4,6,8,10,12],
   'Diminished':[0,2,3,5,6,8,9,11,12],
 };
+const SCALE_GROUPS=[
+  {label:'Major Modes',    scales:['Major','Dorian','Phrygian','Lydian','Mixolydian','Locrian']},
+  {label:'Minor Scales',   scales:['Natural Minor','Harmonic Minor','Melodic Minor']},
+  {label:'Pentatonic & Blues', scales:['Pentatonic Major','Pentatonic Minor','Blues']},
+  {label:'Symmetric & Other',  scales:['Chromatic','Whole Tone','Diminished']},
+];
+const SCALE_DISPLAY={'Major':'Major (Ionian)','Natural Minor':'Natural Minor (Aeolian)'};
 const INTERVAL_NAMES={1:'Minor 2nd',2:'Major 2nd',3:'Minor 3rd',4:'Major 3rd',5:'Perfect 4th',6:'Tritone',7:'Perfect 5th',8:'Minor 6th',9:'Major 6th',10:'Minor 7th',11:'Major 7th',12:'Octave'};
 const CHORD_TYPES=[
   {name:'Major',        semis:[0,4,7]},
@@ -607,9 +668,13 @@ const CHORD_TYPES=[
   {name:'Minor Maj 7th',semis:[0,3,7,11]},
 ];
 
+function getRange(){const s=document.getElementById('rangeSelect');return s?parseInt(s.value)||1:1;}
 function getScaleNotes(){
   const root=document.getElementById('rootSelect').value,sn=document.getElementById('scaleSelect').value,oct=parseInt(document.getElementById('octaveSelect').value),ri=NOTES.indexOf(root);
-  return SCALES[sn].map(i=>{const ts=ri+i;return{note:NOTES[ts%12],octave:oct+Math.floor(ts/12),semis:i};});
+  const range=getRange(),pat=SCALES[sn].slice(0,-1),expanded=[];
+  for(let r=0;r<range;r++) pat.forEach(i=>expanded.push(i+r*12));
+  expanded.push(range*12);
+  return expanded.map(i=>{const ts=ri+i;return{note:NOTES[ts%12],octave:oct+Math.floor(ts/12),semis:i};});
 }
 function getScalePCs(){return new Set(getScaleNotes().map(n=>NOTES.indexOf(n.note)));}
 
@@ -638,19 +703,25 @@ function buildSelects(){
   const rs=document.getElementById('rootSelect');
   NOTES.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=nn(n);rs.appendChild(o);});
   const ss=document.getElementById('scaleSelect');
-  Object.keys(SCALES).forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;ss.appendChild(o);});
+  SCALE_GROUPS.forEach(g=>{const og=document.createElement('optgroup');og.label=g.label;g.scales.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=SCALE_DISPLAY[s]||s;og.appendChild(o);});ss.appendChild(og);});
   ss.value='Major';
   const os=document.getElementById('octaveSelect');
   for(let o=2;o<=6;o++){const e=document.createElement('option');e.value=o;e.textContent='Octave '+o+(o===4?' (Middle C)':'');os.appendChild(e);}
   os.value=4;
+  const rangeEl=document.getElementById('rangeSelect');
+  ['1 Octave','2 Octaves','3 Octaves'].forEach((t,i)=>{const o=document.createElement('option');o.value=i+1;o.textContent=t;rangeEl.appendChild(o);});
+  rangeEl.value=1;
   rs.addEventListener('change',()=>{render();savePref('root',rs.value);});
   ss.addEventListener('change',()=>{render();savePref('scale',ss.value);});
   os.addEventListener('change',()=>{render();savePref('octave',os.value);});
+  rangeEl.addEventListener('change',()=>{render();savePref('range',parseInt(rangeEl.value));});
 }
 
 // ══ QUIZ MODE ══
 let currentQuizMode='notes';
 document.querySelectorAll('.quiz-mode-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  if(btn.dataset.mode===currentQuizMode) return;
+  if(qTotal>0&&!confirm('Switch mode? This will reset your score.')) return;
   currentQuizMode=btn.dataset.mode;
   document.querySelectorAll('.quiz-mode-btn').forEach(b=>b.classList.toggle('active',b===btn));
   doReset();savePref('quizMode',currentQuizMode);
@@ -662,8 +733,10 @@ function restoreSettings(){
   if(p.root) document.getElementById('rootSelect').value=p.root;
   if(p.scale) document.getElementById('scaleSelect').value=p.scale;
   if(p.octave) document.getElementById('octaveSelect').value=p.octave;
+  if(p.range) document.getElementById('rangeSelect').value=p.range;
   if(p.rootFirst) document.getElementById('rootFirstToggle').checked=true;
-  if(p.timerOn){document.getElementById('timerToggle').checked=true;document.getElementById('timerWrap').classList.add('active');}
+  if(p.timbre){currentTimbre=p.timbre;document.getElementById('timbreSelect').value=p.timbre;}
+  {const dur=p.timerDuration!==undefined?p.timerDuration:0;currentTimerDuration=dur;document.querySelectorAll('.timer-dur-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.dur)===dur));document.getElementById('timerWrap').classList.toggle('active',dur>0);if(dur>0)updateTimerRing(dur);}
   if(p.vis){
     currentVis=p.vis;
     document.querySelectorAll('.vis-tab').forEach(t=>t.classList.toggle('active',t.dataset.vis===p.vis));
@@ -690,14 +763,16 @@ function randomiseConfig(){
 // ══ QUIZ STATE ══
 let qCorrect=0,qTotal=0,qWrong=0,qTimeouts=0,qVisWrong=0;
 let qAns=null,qAnsOct=null,qFreq=null,qRefFreq=null,qAnswered=false;
-let qLastNote=null,qMissWeights={};
+let qRecentNotes=[],qLastIntervalAns=null,qLastChordRoot=null,qMissWeights={};
 let qIntervalSemis=null,qRefNote=null,qRefOct=null;
 let qChordObj=null;
 
 function pickNote(pool){
-  const unique=[...new Set(pool.map(n=>n.note))];
-  const eligible=unique.length>1?pool.filter(n=>n.note!==qLastNote):pool;
-  const weights=eligible.map(n=>1+(qMissWeights[n.note]||0));
+  const uniqueKeys=[...new Set(pool.map(n=>n.note+n.octave))];
+  const maxExclude=uniqueKeys.length<=3?1:2;
+  const recentExclude=new Set(qRecentNotes.slice(-maxExclude));
+  const eligible=uniqueKeys.length>maxExclude?pool.filter(n=>!recentExclude.has(n.note+n.octave)):pool;
+  const weights=eligible.map(n=>1+(qMissWeights[n.note+n.octave]||0));
   const total=weights.reduce((a,b)=>a+b,0);
   let r=Math.random()*total;
   for(let i=0;i<eligible.length;i++){r-=weights[i];if(r<=0)return eligible[i];}
@@ -705,25 +780,29 @@ function pickNote(pool){
 }
 
 // ══ TIMER ══
-const TIMER_SECS=10,TIMER_CIRC=100.53;
-let timerHandle=null,timerSecs=0;
-document.getElementById('timerToggle').addEventListener('change',e=>{
-  document.getElementById('timerWrap').classList.toggle('active',e.target.checked);
-  if(!e.target.checked) stopTimer();
-  savePref('timerOn',e.target.checked);
-});
+const TIMER_CIRC=100.53;
+let currentTimerDuration=0,timerHandle=null,timerSecs=0;
+document.querySelectorAll('.timer-dur-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  const dur=parseInt(btn.dataset.dur);
+  currentTimerDuration=dur;
+  document.querySelectorAll('.timer-dur-btn').forEach(b=>b.classList.toggle('active',b===btn));
+  document.getElementById('timerWrap').classList.toggle('active',dur>0);
+  if(!dur) stopTimer(); else updateTimerRing(dur);
+  savePref('timerDuration',dur);
+}));
 document.getElementById('rootFirstToggle').addEventListener('change',e=>savePref('rootFirst',e.target.checked));
 function startTimer(){
-  stopTimer();if(!document.getElementById('timerToggle').checked)return;
-  timerSecs=TIMER_SECS;updateTimerRing(timerSecs);
+  stopTimer();if(!currentTimerDuration)return;
+  timerSecs=currentTimerDuration;updateTimerRing(timerSecs);
   timerHandle=setInterval(()=>{timerSecs--;updateTimerRing(timerSecs);if(timerSecs<=0){stopTimer();handleTimeout();}},1000);
 }
 function stopTimer(){clearInterval(timerHandle);timerHandle=null;}
 function updateTimerRing(s){
   const arc=document.getElementById('timerArc'),num=document.getElementById('timerNum');
   if(!arc)return;
-  arc.style.strokeDashoffset=TIMER_CIRC*(1-Math.max(0,s/TIMER_SECS));
-  num.textContent=s;const u=s<=3;arc.classList.toggle('urgent',u);num.classList.toggle('urgent',u);
+  const total=currentTimerDuration||1;
+  arc.style.strokeDashoffset=TIMER_CIRC*(1-Math.max(0,s/total));
+  num.textContent=s;const u=s<=3&&s>0;arc.classList.toggle('urgent',u);num.classList.toggle('urgent',u);
 }
 function handleTimeout(){
   if(qAnswered)return;
@@ -740,7 +819,7 @@ function handleTimeout(){
     highlightChord(qChordObj.notes,'wrong');
   } else {
     if(qFreq) playTone(qFreq,getCtx().currentTime,1.2);
-    qMissWeights[qAns]=(qMissWeights[qAns]||0)+1.2;
+    qMissWeights[qAns+qAnsOct]=(qMissWeights[qAns+qAnsOct]||0)+1.2;
     highlightNotes([{note:qAns,octave:qAnsOct}],'wrong',[{note:qAns,octave:qAnsOct}]);
   }
   updateScoreDisplay();
@@ -781,7 +860,8 @@ function showOverlay(){
 function dismissOverlay(){closeModal('scoreOverlay');doReset();}
 function doReset(){
   stopTimer();cancelScalePlayback();
-  qCorrect=0;qTotal=0;qWrong=0;qTimeouts=0;qVisWrong=0;qMissWeights={};qLastNote=null;
+  if(qTotal+qTimeouts>0){const LS_S='earTrainer_sessions';try{const ss=JSON.parse(localStorage.getItem(LS_S)||'[]');ss.push({ts:Date.now(),mode:currentQuizMode,total:qTotal,correct:qCorrect,wrong:qWrong+qVisWrong,timeouts:qTimeouts,acc:Math.round(qCorrect/(qTotal+qTimeouts)*100)});if(ss.length>30)ss.shift();localStorage.setItem(LS_S,JSON.stringify(ss));}catch(e){}}
+  qCorrect=0;qTotal=0;qWrong=0;qTimeouts=0;qVisWrong=0;qMissWeights={};qRecentNotes=[];qLastIntervalAns=null;qLastChordRoot=null;
   qAns=null;qAnsOct=null;qFreq=null;qRefFreq=null;qAnswered=false;
   qIntervalSemis=null;qRefNote=null;qRefOct=null;qChordObj=null;
   document.getElementById('quizFeedback').textContent='';
@@ -789,7 +869,7 @@ function doReset(){
   document.getElementById('quizPrompt').textContent='Select a mode and start the quiz';
   document.getElementById('quizOptions').innerHTML='';
   document.getElementById('scoreRow').classList.remove('visible');
-  updateTimerRing(TIMER_SECS);render();
+  updateTimerRing(currentTimerDuration);render();
 }
 function resetScore(){showOverlay();}
 
@@ -799,8 +879,9 @@ function buildPiano(hsMap){
   hsMap=hsMap||new Map();
   const piano=document.getElementById('piano');piano.innerHTML='';
   const oct=parseInt(document.getElementById('octaveSelect').value);
+  const range=getRange();
   const inScale=new Set(getScaleNotes().map(n=>n.note+n.octave));
-  [oct,oct+1].forEach(o=>{
+  Array.from({length:range+1},(_,i)=>oct+i).forEach(o=>{
     WN.forEach(note=>{
       const k=document.createElement('div');k.className='white-key';
       if(inScale.has(note+o)) k.classList.add('in-scale');
@@ -948,16 +1029,28 @@ function startQuiz(){
 
 // ── Note Names ──
 function startNoteQuiz(){
-  const pool=getScaleNotes().filter((n,i,a)=>!(i===a.length-1&&n.semis===12));
-  const correct=pickNote(pool);
-  qLastNote=correct.note;qAns=correct.note;qAnsOct=correct.octave;
+  const allNotes=getScaleNotes();
+  const pool=allNotes.slice(0,-1); // exclude final octave-duplicate note
+  const tonic=pool[0];
+  const refFirst=document.getElementById('rootFirstToggle').checked;
+  // Fix 2: exclude tonic from pick pool when playing reference first
+  let pickPool=pool;
+  if(refFirst&&pool.length>1){
+    const noTonic=pool.filter(n=>!(n.note===tonic.note&&n.octave===tonic.octave));
+    if(noTonic.length>0) pickPool=noTonic;
+  }
+  const correct=pickNote(pickPool);
+  // Fix 1: track recent notes (max 2) for no-repeat
+  qRecentNotes.push(correct.note+correct.octave);
+  if(qRecentNotes.length>2) qRecentNotes.shift();
+  qAns=correct.note;qAnsOct=correct.octave;
   qFreq=noteFreq(correct.note,correct.octave);
-  qRefFreq=noteFreq(pool[0].note,pool[0].octave);
+  qRefFreq=noteFreq(tonic.note,tonic.octave);
   const unique=[...new Set(pool.map(n=>n.note))];
   buildQuizOpts(unique.map(n=>({label:nn(n),value:n})),v=>checkNoteAns(v));
-  const refFirst=document.getElementById('rootFirstToggle').checked;
   const ctx=getCtx();
-  if(refFirst&&qRefFreq!==qFreq){
+  const isTonic=correct.note===tonic.note&&correct.octave===tonic.octave;
+  if(refFirst&&!isTonic){
     document.getElementById('quizPrompt').textContent='🎵 Root → ? (What note follows?)';
     playTone(qRefFreq,ctx.currentTime,0.6);playTone(qFreq,ctx.currentTime+0.85,1.2);
   } else {
@@ -975,11 +1068,11 @@ function checkNoteAns(note){
   if(ok){
     qCorrect++;if(btn)btn.classList.add('correct');
     fb.textContent='✓ Correct!';fb.className='quiz-feedback correct';
-    if((qMissWeights[note]||0)>0) qMissWeights[note]=Math.max(0,qMissWeights[note]-0.4);
+    if((qMissWeights[note+qAnsOct]||0)>0) qMissWeights[note+qAnsOct]=Math.max(0,qMissWeights[note+qAnsOct]-0.4);
   } else {
     qWrong++;if(btn)btn.classList.add('wrong');
     fb.textContent='✗ That was '+nn(qAns);fb.className='quiz-feedback wrong';
-    qMissWeights[qAns]=(qMissWeights[qAns]||0)+0.8;
+    qMissWeights[qAns+qAnsOct]=(qMissWeights[qAns+qAnsOct]||0)+0.8;
     document.querySelectorAll('.quiz-opt').forEach(b=>{if(b.dataset.val===qAns)b.classList.add('correct');});
   }
   updateScoreDisplay();
@@ -990,10 +1083,14 @@ function checkNoteAns(note){
 
 // ── Intervals ──
 function startIntervalQuiz(){
-  const pool=getScaleNotes().filter((n,i,a)=>!(i===a.length-1&&n.semis===12));
+  const allNotes=getScaleNotes();
+  const pool=allNotes.slice(0,-1); // exclude final octave-duplicate note
   if(pool.length<2){document.getElementById('quizPrompt').textContent='Scale needs at least 2 unique notes for interval quiz';return;}
-  const correct=pickNote(pool);
-  qLastNote=correct.note;qAns=correct.note;qAnsOct=correct.octave;
+  // Fix 1: exclude last interval answer to avoid immediate repeat
+  const pickPool=qLastIntervalAns&&pool.length>1?pool.filter(n=>n.note+n.octave!==qLastIntervalAns):pool;
+  const correct=pickNote(pickPool.length?pickPool:pool);
+  qLastIntervalAns=correct.note+correct.octave;
+  qAns=correct.note;qAnsOct=correct.octave;
   qFreq=noteFreq(correct.note,correct.octave);
   // Pick reference note different from the answer note
   const others=pool.filter(n=>n.note!==correct.note);
@@ -1034,11 +1131,11 @@ function checkIntervalAns(semis){
   if(ok){
     qCorrect++;if(btn)btn.classList.add('correct');
     fb.textContent='✓ Correct! '+correctLabel;fb.className='quiz-feedback correct';
-    if((qMissWeights[qAns]||0)>0) qMissWeights[qAns]=Math.max(0,qMissWeights[qAns]-0.4);
+    if((qMissWeights[qAns+qAnsOct]||0)>0) qMissWeights[qAns+qAnsOct]=Math.max(0,qMissWeights[qAns+qAnsOct]-0.4);
   } else {
     qWrong++;if(btn)btn.classList.add('wrong');
     fb.textContent='✗ That was '+correctLabel;fb.className='quiz-feedback wrong';
-    qMissWeights[qAns]=(qMissWeights[qAns]||0)+0.8;
+    qMissWeights[qAns+qAnsOct]=(qMissWeights[qAns+qAnsOct]||0)+0.8;
     document.querySelectorAll('.quiz-opt').forEach(b=>{if(parseInt(b.dataset.val)===qIntervalSemis)b.classList.add('correct');});
   }
   updateScoreDisplay();
@@ -1055,7 +1152,10 @@ function checkIntervalAns(semis){
 function startChordQuiz(){
   const chords=getScaleChords();
   if(chords.length<2){document.getElementById('quizPrompt').textContent='Not enough diatonic chords — try Major or Natural Minor';return;}
-  const correct=chords[Math.floor(Math.random()*chords.length)];
+  // Fix 1: exclude last chord root to avoid immediate repeat
+  const pickChords=qLastChordRoot!==null&&chords.length>1?chords.filter(c=>c.rootPc!==qLastChordRoot):chords;
+  const correct=(pickChords.length?pickChords:chords)[Math.floor(Math.random()*(pickChords.length||chords.length))];
+  qLastChordRoot=correct.rootPc;
   qChordObj=correct;qAns=correct.type;
   const allTypes=[...new Set(chords.map(c=>c.type))];
   const distractors=shuffle(allTypes.filter(t=>t!==correct.type)).slice(0,Math.min(5,allTypes.length-1));
@@ -1111,6 +1211,35 @@ function render(){
   else if(currentVis==='guitar') buildFretboard();
   else if(currentVis==='bass') buildBass();
   else buildUkulele();
+}
+
+// ══ TIMBRE ══
+document.getElementById('timbreSelect').addEventListener('change',e=>{currentTimbre=e.target.value;savePref('timbre',currentTimbre);});
+
+// ══ SESSION HISTORY ══
+const LS_SESSIONS_KEY='earTrainer_sessions';
+function openSessionsOverlay(){buildSessionsChart();openModal('sessionsOverlay');}
+function buildSessionsChart(){
+  let sessions=[];try{sessions=JSON.parse(localStorage.getItem(LS_SESSIONS_KEY)||'[]');}catch(e){}
+  const el=document.getElementById('sessionsContent');
+  if(!sessions.length){el.innerHTML='<div class="session-empty">No sessions recorded yet. Complete a quiz and press Reset to save.</div>';return;}
+  const cs=getComputedStyle(document.body);
+  const clrC=cs.getPropertyValue('--correct').trim(),clrA=cs.getPropertyValue('--accent').trim(),clrW=cs.getPropertyValue('--wrong').trim();
+  const clrM=cs.getPropertyValue('--muted').trim(),clrB=cs.getPropertyValue('--border').trim();
+  const n=sessions.length,bw=12,gap=4,pL=22,pT=4,chartH=70,pB=16;
+  // Sanitize accuracy values from localStorage sessions: coerce to number, handle NaN/Infinity, clamp to [0,100]
+  const accValues=sessions.map(s=>{
+    const raw=(s&&typeof s.acc!=='undefined')?Number(s.acc):0;
+    const safeFinite=Number.isFinite(raw)?raw:0;
+    return Math.min(100,Math.max(0,safeFinite));
+  });
+  const chartW=Math.max(n*(bw+gap)-gap,1),svgW=pL+chartW+8,svgH=pT+chartH+pB;
+  let svg=`<svg viewBox="0 0 ${svgW} ${svgH}" style="width:${svgW}px;max-width:100%;display:block;margin:0 auto">`;
+  [0,25,50,75,100].forEach(v=>{const y=pT+chartH-Math.round(v/100*chartH);svg+=`<line x1="${pL}" y1="${y}" x2="${pL+chartW}" y2="${y}" stroke="${clrB}" stroke-width="0.5"/>`;svg+=`<text x="${pL-3}" y="${y+3}" font-size="7" fill="${clrM}" font-family="monospace" text-anchor="end">${v}</text>`;});
+  accValues.forEach((acc,i)=>{const x=pL+i*(bw+gap),h=Math.max(2,Math.round(acc/100*chartH)),y=pT+chartH-h;const col=acc>=70?clrC:acc>=50?clrA:clrW;svg+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${col}" rx="2" opacity="0.85"/>`;});
+  svg+='</svg>';
+  const best=Math.max(...accValues),avg=Math.round(accValues.reduce((a,v)=>a+v,0)/accValues.length);
+  el.innerHTML=`<div style="overflow-x:auto;padding:4px 0">${svg}</div><div class="session-stats-text">${n} session${n===1?'':'s'} &bull; Best: ${best}% &bull; Avg: ${avg}%</div>`;
 }
 
 // ══ INIT ══
