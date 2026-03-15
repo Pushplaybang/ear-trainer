@@ -988,7 +988,16 @@ function restoreSettings(){
   const subLen=Math.max(0,subdivision-1);
   if(p.subAccentLevels&&Array.isArray(p.subAccentLevels)&&p.subAccentLevels.length===beatsPerBar&&
      p.subAccentLevels.every(a=>Array.isArray(a)&&a.length===subLen)){
-    subAccentLevels=p.subAccentLevels;
+    // Normalize each stored sub-accent level to an integer in [1,3]
+    subAccentLevels=p.subAccentLevels.map(row=>
+      row.map(v=>{
+        let n=parseInt(v,10);
+        if(isNaN(n)) n=1;
+        if(n<1) n=1;
+        else if(n>3) n=3;
+        return n;
+      })
+    );
   } else {
     subAccentLevels=Array.from({length:beatsPerBar},()=>new Array(subLen).fill(1));
   }
