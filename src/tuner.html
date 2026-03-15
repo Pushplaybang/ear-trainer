@@ -846,17 +846,29 @@ function playRefTone(){
   if(!targetFreq)return;
   const btn=document.getElementById('playRefBtn');
   btn.disabled=true;btn.classList.add('playing');
-  const refCtx=new(window.AudioContext||window.webkitAudioContext)();
-  const osc=refCtx.createOscillator(),g=refCtx.createGain();
-  osc.type='sine';osc.frequency.value=targetFreq;
-  const t=refCtx.currentTime;
-  g.gain.setValueAtTime(0,t);
-  g.gain.linearRampToValueAtTime(0.3,t+0.02);
-  g.gain.setValueAtTime(0.3,t+1.8);
-  g.gain.linearRampToValueAtTime(0,t+2.0);
-  osc.connect(g);g.connect(refCtx.destination);
-  osc.start(t);osc.stop(t+2.05);
-  osc.onended=()=>{refCtx.close();btn.disabled=false;btn.classList.remove('playing');};
+  let refCtx=null;
+  try{
+    refCtx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=refCtx.createOscillator(),g=refCtx.createGain();
+    osc.type='sine';osc.frequency.value=targetFreq;
+    const t=refCtx.currentTime;
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(0.3,t+0.02);
+    g.gain.setValueAtTime(0.3,t+1.8);
+    g.gain.linearRampToValueAtTime(0,t+2.0);
+    osc.connect(g);g.connect(refCtx.destination);
+    osc.start(t);osc.stop(t+2.05);
+    osc.onended=()=>{refCtx.close();btn.disabled=false;btn.classList.remove('playing');};
+  }catch(e){
+    if(refCtx){
+      try{refCtx.close();}catch(_){}
+    }
+    btn.disabled=false;
+    btn.classList.remove('playing');
+    if(window&&window.console&&console.error){
+      console.error('Failed to play reference tone:',e);
+    }
+  }
 }
 
 // ══ INIT SELECTS ══
