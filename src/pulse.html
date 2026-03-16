@@ -171,11 +171,11 @@ button{font-family:var(--font-b);font-size:.72rem;letter-spacing:.06em;border:no
 /* Beat grid */
 .beat-grid{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;width:100%;max-width:660px;}
 .beat-cell{display:flex;flex-direction:column;align-items:center;gap:5px;flex:0 0 auto;}
-.beat-dot{width:50px;height:50px;border-radius:50%;border:2px solid var(--beat-ring);background:var(--beat-normal);transition:background .07s,border-color .07s,transform .07s,box-shadow .07s;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.beat-dot{width:36px;height:36px;border-radius:50%;border:2px solid var(--beat-ring);background:var(--beat-normal);transition:background .07s,border-color .07s,transform .07s,box-shadow .07s;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
 .beat-dot::after{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(255,255,255,.14),transparent 60%);}
 .beat-dot.accent{border-color:var(--beat-accent);background:var(--surface2);}
 .beat-dot.accent::before{content:'';position:absolute;width:9px;height:9px;border-radius:50%;background:var(--beat-accent);opacity:.5;}
-.beat-dot.sub{width:32px;height:32px;border-width:1px;background:var(--beat-sub);}
+.beat-dot.sub{width:22px;height:22px;border-width:1px;background:var(--beat-sub);}
 .beat-dot.sub.accent{background:var(--surface2);}
 
 .beat-dot.active-beat{background:var(--beat-accent)!important;border-color:var(--beat-accent)!important;transform:scale(1.13);box-shadow:0 0 24px var(--accent-glow),0 4px 12px rgba(0,0,0,.4);}
@@ -187,6 +187,25 @@ button{font-family:var(--font-b);font-size:.72rem;letter-spacing:.06em;border:no
 /* Accent ring for level 2 */
 .accent-ring{position:absolute;inset:5px;border-radius:50%;border:2px solid var(--beat-accent);opacity:0;transition:opacity .2s;}
 .beat-dot[data-accent="2"] .accent-ring{opacity:.55;}
+
+/* Beat grid hero wrap */
+.beat-grid-wrap{background:var(--surface-lo);border-radius:var(--r-md,18px);box-shadow:var(--neu-in);padding:16px;width:100%;box-sizing:border-box;}
+.beat-grid-label{font-family:var(--font-b,monospace);font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);text-align:center;margin-bottom:12px;}
+.bpm-compact-row{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;margin-bottom:16px;}
+.bpm-left{display:flex;flex-direction:column;align-items:flex-start;gap:2px;}
+.bpm-right{display:flex;flex-direction:column;align-items:stretch;gap:8px;flex:1;max-width:260px;}
+.bpm-compact-num{font-family:var(--font-h);font-size:clamp(2.4rem,10vw,3.6rem);color:var(--accent);line-height:1;letter-spacing:-2px;cursor:default;user-select:none;}
+.bpm-nudge-row{display:flex;gap:6px;}
+.btn-ghost{background:transparent;border:1px solid var(--border);border-radius:var(--r-sm,10px);color:var(--text-2);font-family:var(--font-b,monospace);font-size:.62rem;padding:6px 12px;cursor:pointer;transition:all .18s;}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.timesig-tap-row{display:flex;align-items:center;gap:10px;width:100%;margin-top:12px;}
+.timesig-segs{display:flex;gap:6px;flex-wrap:wrap;flex:1;}
+.timesig-seg-btn{font-family:var(--font-b,monospace);font-size:.7rem;padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm,10px);color:var(--text-2);cursor:pointer;transition:all .18s;}
+.timesig-seg-btn:hover{border-color:var(--accent);color:var(--accent);}
+.timesig-seg-btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+.tap-compact{width:46px;height:46px;border-radius:50%;background:var(--surface);border:1px solid var(--border);box-shadow:var(--neu-out);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;transition:all .15s;font-family:var(--font-b,monospace);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-2);}
+.tap-compact:active{box-shadow:var(--neu-in);transform:scale(0.92);}
+.sub-row-compact{display:flex;gap:6px;margin-top:10px;width:100%;}
 
 /* Position bar */
 .position-bar{width:100%;max-width:440px;background:var(--surface2);border-radius:4px;height:5px;overflow:hidden;}
@@ -263,8 +282,8 @@ button{font-family:var(--font-b);font-size:.72rem;letter-spacing:.06em;border:no
 .num-stepper-val{font-family:var(--font-b);font-size:.62rem;color:var(--text);min-width:20px;text-align:center;letter-spacing:.04em;}
 
 @media(max-width:500px){
-  .beat-dot{width:44px;height:44px;}
-  .beat-dot.sub{width:36px;height:36px;}
+  .beat-dot{width:36px;height:36px;}
+  .beat-dot.sub{width:22px;height:22px;}
   .bpm-number{font-size:clamp(2.5rem,15vw,4rem);}
 }
 @media(max-width:600px){
@@ -333,10 +352,22 @@ button{font-family:var(--font-b);font-size:.72rem;letter-spacing:.06em;border:no
 
   <!-- MAIN VISUAL CARD -->
   <div class="metro-visual-card">
-    <div class="bpm-display">
-      <div class="bpm-number" id="bpmDisplay">120</div>
-      <div class="bpm-label">BPM</div>
-      <div class="bpm-tempo-name" id="tempoName">Moderato</div>
+    <!-- BPM COMPACT ROW -->
+    <div class="bpm-compact-row">
+      <div class="bpm-left">
+        <div class="bpm-compact-num" id="bpmDisplay">120</div>
+        <div class="bpm-label">BPM</div>
+        <div class="bpm-tempo-name" id="tempoName">Moderato</div>
+      </div>
+      <div class="bpm-right">
+        <input type="range" id="bpmSlider" min="20" max="300" value="120" oninput="setBpm(+this.value)">
+        <div class="bpm-nudge-row">
+          <button class="btn-ghost" onclick="adjustBpm(-10)">−10</button>
+          <button class="btn-ghost" onclick="adjustBpm(-1)">−1</button>
+          <button class="btn-ghost" onclick="adjustBpm(1)">+1</button>
+          <button class="btn-ghost" onclick="adjustBpm(10)">+10</button>
+        </div>
+      </div>
     </div>
 
     <!-- Pendulum (canvas-based: arm + bob always perfectly connected) -->
@@ -344,21 +375,31 @@ button{font-family:var(--font-b);font-size:.72rem;letter-spacing:.06em;border:no
       <canvas id="pendulumCanvas"></canvas>
     </div>
 
-    <div class="beat-grid" id="beatGrid"></div>
+    <!-- BEAT GRID HERO -->
+    <div class="beat-grid-wrap">
+      <div class="beat-grid-label" id="beatGridLabel">4/4 · click to set accent</div>
+      <div class="beat-grid" id="beatGrid"></div>
+    </div>
 
     <div class="position-bar"><div class="position-fill" id="positionFill"></div></div>
 
-    <div class="transport">
-      <button class="transport-btn" onclick="adjustBpm(-10)">−10</button>
-      <button class="transport-btn" onclick="adjustBpm(-1)">−1</button>
-      <button class="transport-btn play-btn" id="playBtn" onclick="togglePlay()">▶</button>
-      <button class="transport-btn" onclick="adjustBpm(1)">+1</button>
-      <button class="transport-btn" onclick="adjustBpm(10)">+10</button>
+    <!-- TIME SIG + TAP ROW -->
+    <div class="timesig-tap-row">
+      <div class="timesig-segs" id="timesigSegs">
+        <button class="timesig-seg-btn" data-beats="3" data-note="4" onclick="applyTimeSigPreset(this)">3/4</button>
+        <button class="timesig-seg-btn active" data-beats="4" data-note="4" onclick="applyTimeSigPreset(this)">4/4</button>
+        <button class="timesig-seg-btn" data-beats="6" data-note="8" onclick="applyTimeSigPreset(this)">6/8</button>
+        <button class="timesig-seg-btn" data-beats="5" data-note="4" onclick="applyTimeSigPreset(this)">5/4</button>
+      </div>
+      <button class="tap-compact" id="tapBtn" onclick="tapTempo()">TAP</button>
     </div>
 
-    <div class="bpm-slider-wrap">
-      <input type="range" id="bpmSlider" min="20" max="300" value="120" oninput="setBpm(+this.value)">
-      <button class="bpm-tap" id="tapBtn" onclick="tapTempo()">Tap</button>
+    <!-- SUBDIVISION ROW -->
+    <div class="sub-row-compact">
+      <button class="sub-btn active" data-sub="1" onclick="setSub(1)"><span class="sub-icon">♩</span>None</button>
+      <button class="sub-btn" data-sub="2" onclick="setSub(2)"><span class="sub-icon">♪♪</span>8ths</button>
+      <button class="sub-btn" data-sub="3" onclick="setSub(3)"><span class="sub-icon">♪♪♪</span>Triplets</button>
+      <button class="sub-btn" data-sub="4" onclick="setSub(4)"><span class="sub-icon">♬♬</span>16ths</button>
     </div>
 
     <!-- Panel controls: arm toggle, count-in, mute bars, click rate -->
@@ -387,6 +428,10 @@ button{font-family:var(--font-b);font-size:.72rem;letter-spacing:.06em;border:no
         <span class="rate-sep"></span>
         <button class="rate-btn" id="rateDouble" onclick="setClickRate(2)">2×</button>
       </div>
+    </div>
+
+    <div class="transport" style="margin-top:14px;">
+      <button class="transport-btn play-btn" id="playBtn" onclick="togglePlay()">▶</button>
     </div>
   </div>
 
@@ -772,6 +817,7 @@ function applyTimeSig(){
   if(accentLevels[0]<3) accentLevels[0]=3;
   subAccentLevels=Array.from({length:beatsPerBar},()=>new Array(Math.max(0,subdivision-1)).fill(1));
   buildBeatGrid(); updatePresetHighlight(); saveAllPrefs();
+  if(typeof updateBeatGridLabel==='function') updateBeatGridLabel();
 }
 function updatePresetHighlight(){
   document.querySelectorAll('.preset-btn').forEach(b=>b.classList.toggle('active',+b.dataset.beats===beatsPerBar&&+b.dataset.note===noteValue));
@@ -1431,8 +1477,31 @@ function restoreSettings(){
   if(p.stDuration!=null) document.getElementById('stDuration').value=p.stDuration;
   // 7. Update all derived UI
   updateSoundLabel(); updateSwingLabel(); updatePresetHighlight(); buildBeatGrid();
+  // 7b. Sync timesig-seg-btn active state
+  document.querySelectorAll('.timesig-seg-btn').forEach(b=>{
+    b.classList.toggle('active',+b.dataset.beats===beatsPerBar && +b.dataset.note===noteValue);
+  });
+  updateBeatGridLabel();
   // 8. Draw pendulum after a frame so CSS vars are fully resolved
   requestAnimationFrame(()=>{refreshThemeCache(); drawPendulumIdle();});
+}
+
+// ── TIME SIG PRESET BUTTONS (main card compact row) ─────
+function applyTimeSigPreset(btn){
+  document.querySelectorAll('.timesig-seg-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // sync to the existing selects
+  var beatsEl=document.getElementById('beatsPerBar');
+  var noteEl=document.getElementById('noteValue');
+  if(beatsEl) beatsEl.value=btn.dataset.beats;
+  if(noteEl) noteEl.value=btn.dataset.note;
+  applyTimeSig();
+  updateBeatGridLabel();
+}
+function updateBeatGridLabel(){
+  var lbl=document.getElementById('beatGridLabel');
+  if(!lbl) return;
+  lbl.textContent=beatsPerBar+'/'+(noteValue||4)+' · click to set accent';
 }
 
 // ── KEYBOARD ────────────────────────────────────────
