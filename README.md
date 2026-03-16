@@ -39,6 +39,7 @@ music-tools/
 │   ├── practice-timer.html       # Practice Timer
 │   ├── chord-reference.html      # Chord & Scale Reference
 │   └── rhythm.html              # Rhythm Pattern Trainer
+│   └── chord-reference.html      # Chord & Scale Reference
 ├── music-tools-boilerplate.html  # Shared design system starter
 ├── docs/
 │   ├── ARCHITECTURE.md           # Shared patterns, audio engine, theme system
@@ -49,6 +50,7 @@ music-tools/
 │   ├── practice-timer.md         # Practice Timer documentation
 │   ├── chord-reference.md        # Chord & Scale Reference documentation
 │   └── rhythm.md                 # Rhythm documentation
+│   └── chord-reference.md        # Chord & Scale Reference documentation
 ├── CLAUDE.md                     # AI assistant instructions & conventions
 └── README.md                     # This file
 ```
