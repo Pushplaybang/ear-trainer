@@ -79,6 +79,15 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg-grad);pointer
 .mode-toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:transform .3s,background .22s;}
 [data-mode="dark"] .mode-toggle::after{transform:translateX(22px);background:var(--accent);}
 
+.progress-wrap{display:flex;flex-direction:column;gap:5px;}
+.progress-label-row{display:flex;justify-content:space-between;align-items:center;}
+.progress-label{font-family:var(--font-b,monospace);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);}
+.progress-val{font-family:var(--font-b,monospace);font-size:.68rem;font-weight:500;color:var(--accent);}
+.progress-track{height:5px;border-radius:3px;background:var(--surface-lo2);box-shadow:var(--neu-in);position:relative;overflow:hidden;}
+.progress-track.thin{height:3px;}
+.progress-fill{position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:3px;box-shadow:0 0 8px var(--accent-glow);transition:width .3s ease;}
+.progress-track.block .progress-fill{background:linear-gradient(90deg,var(--correct),var(--accent));box-shadow:0 0 6px var(--correct-glow);}
+
 /* ── CONTENT ── */
 .content{position:relative;z-index:1;width:100%;max-width:700px;padding:28px 16px 0;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;}
 header{text-align:center;margin-bottom:28px;}
@@ -300,6 +309,16 @@ button{font-family:var(--font-b);cursor:pointer;}
         <div class="meter-needle" id="meterNeedle"></div>
       </div>
       <div class="cents-readout" id="centsDisplay"></div>
+    </div>
+    <!-- Pitch deviation bar -->
+    <div class="progress-wrap" style="margin:10px 0;padding:0 20px;">
+      <div class="progress-label-row">
+        <span class="progress-label">PITCH</span>
+        <span class="progress-val" id="pitchBarVal">—</span>
+      </div>
+      <div class="progress-track thin" id="pitchBarTrack">
+        <div class="progress-fill" id="pitchBarFill" style="width:50%"></div>
+      </div>
     </div>
     <!-- Mic button inside display -->
     <div class="mic-section">
@@ -610,6 +629,8 @@ function resetDisplay(){
   document.getElementById('centsDisplay').className='cents-readout';
   document.getElementById('meterNeedle').style.left='50%';
   document.getElementById('inTuneLed').classList.remove('lit');
+  var pitchFill=document.getElementById('pitchBarFill');var pitchVal=document.getElementById('pitchBarVal');
+  if(pitchFill)pitchFill.style.width='50%';if(pitchVal)pitchVal.textContent='—';
 }
 function detectLoop(){
   if(!micActive){return;}
@@ -686,6 +707,20 @@ function updateTunerDisplay(note,oct,freq,cents,autodetect,smoothed){
   else if(cents>0){cd.textContent='+'+cents+'¢ sharp';cd.className='cents-readout sharp';}
   else{cd.textContent=cents+'¢ flat';cd.className='cents-readout flat';}
   document.getElementById('inTuneLed').classList.toggle('lit',inTune);
+  // Update pitch deviation bar
+  var pitchFill = document.getElementById('pitchBarFill');
+  var pitchVal = document.getElementById('pitchBarVal');
+  var pitchTrack = document.getElementById('pitchBarTrack');
+  if(pitchFill && pitchVal && pitchTrack) {
+    var c = cents; // raw cents value (-50 to +50)
+    var pct = Math.max(0, Math.min(100, ((c + 50) / 100) * 100));
+    pitchFill.style.width = pct + '%';
+    pitchVal.textContent = (c >= 0 ? '+' : '') + Math.round(c) + '¢';
+    // color: correct when in tune, accent otherwise
+    pitchFill.style.background = Math.abs(c) < 5
+      ? 'linear-gradient(90deg,var(--correct),var(--accent))'
+      : 'linear-gradient(90deg,var(--accent),var(--accent-2))';
+  }
 }
 
 // ══ PITCH TRACE CANVAS ══

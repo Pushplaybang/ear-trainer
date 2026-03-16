@@ -75,6 +75,14 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg-grad);pointer
 .mode-toggle{width:48px;height:26px;border-radius:13px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;position:relative;flex-shrink:0;}
 .mode-toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:transform .3s,background .22s;}
 [data-mode="dark"] .mode-toggle::after{transform:translateX(22px);background:var(--accent);}
+.progress-wrap{display:flex;flex-direction:column;gap:5px;}
+.progress-label-row{display:flex;justify-content:space-between;align-items:center;}
+.progress-label{font-family:var(--font-b,monospace);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);}
+.progress-val{font-family:var(--font-b,monospace);font-size:.68rem;font-weight:500;color:var(--accent);}
+.progress-track{height:5px;border-radius:3px;background:var(--surface-lo2);box-shadow:var(--neu-in);position:relative;overflow:hidden;}
+.progress-track.thin{height:3px;}
+.progress-fill{position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:3px;box-shadow:0 0 8px var(--accent-glow);transition:width .3s ease;}
+.progress-track.block .progress-fill{background:linear-gradient(90deg,var(--correct),var(--accent));box-shadow:0 0 6px var(--correct-glow);}
 .content{position:relative;z-index:1;width:100%;max-width:860px;padding:28px 16px 0;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;}
 header{text-align:center;margin-bottom:28px;}
 header h1{font-family:var(--font-h);font-size:clamp(1.5rem,5vw,2.8rem);color:var(--accent);line-height:1.1;transition:color .35s,font-size .35s;}
@@ -389,6 +397,16 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
         <span class="sc-item">Acc <span class="sc-acc" id="scAcc">—</span></span>
       </div>
       <div class="quiz-prompt" id="quizPrompt">Select a mode and start the quiz</div>
+      <!-- Quiz progress bar -->
+      <div class="progress-wrap" id="quizProgressWrap" style="margin-bottom:12px;">
+        <div class="progress-label-row">
+          <span class="progress-label">ROUND</span>
+          <span class="progress-val" id="quizProgressVal">0%</span>
+        </div>
+        <div class="progress-track thin block">
+          <div class="progress-fill" id="quizProgressFill" style="width:0%"></div>
+        </div>
+      </div>
       <div class="quiz-options" id="quizOptions"></div>
       <div class="quiz-feedback" id="quizFeedback"></div>
       <div class="toggles-row">
@@ -742,6 +760,17 @@ function updateScoreDisplay(){
   document.getElementById('scWrong').textContent=qWrong+qVisWrong;
   document.getElementById('scTimeout').textContent=qTimeouts;
   document.getElementById('scAcc').textContent=tot>0?Math.round(qCorrect/tot*100)+'%':'—';
+  // Update quiz progress bar
+  (function(){
+    var fill=document.getElementById('quizProgressFill');
+    var val=document.getElementById('quizProgressVal');
+    if(!fill||!val) return;
+    var roundLength=10;
+    var done=qTotal+qTimeouts;
+    var pct=roundLength>0?Math.min(100,Math.round((done/roundLength)*100)):0;
+    fill.style.width=pct+'%';
+    val.textContent=pct+'%';
+  })();
 }
 
 // ══ SCORE OVERLAY ══
@@ -777,6 +806,8 @@ function doReset(){
   document.getElementById('quizPrompt').textContent='Select a mode and start the quiz';
   document.getElementById('quizOptions').innerHTML='';
   document.getElementById('scoreRow').classList.remove('visible');
+  var pFill=document.getElementById('quizProgressFill');var pVal=document.getElementById('quizProgressVal');
+  if(pFill) pFill.style.width='0%';if(pVal) pVal.textContent='0%';
   updateTimerRing(currentTimerDuration);render();
 }
 function resetScore(){showOverlay();}
