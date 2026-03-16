@@ -795,9 +795,9 @@ function findGuitarVoicings(rootName, chordTypeName, maxVoicings){
       return opts;
     });
 
-    // Generate combinations with cap to avoid excessive computation
+    // Generate combinations with cap to prevent browser freeze on dense chords
     let comboCount = 0;
-    const COMBO_LIMIT = 8000;
+    const COMBO_LIMIT = 8000; // Performance safeguard: caps enumeration of 6-string voicing combinations
     function* combos(idx, current){
       if(comboCount >= COMBO_LIMIT) return;
       if(idx === 6){ comboCount++; yield current.slice(); return; }
@@ -943,7 +943,7 @@ function renderChordDiagram(voicing, rootName, chordTypeName){
       const label = intervalMap.get(pc) || NOTES[pc];
 
       svg += '<circle cx="' + x + '" cy="' + y + '" r="8" fill="' + col + '"/>';
-      svg += '<text x="' + x + '" y="' + (y + 3.5) + '" font-size="7" fill="' + (isRoot ? cs.getPropertyValue('--pill-text').trim() : '#000') + '" font-family="monospace" text-anchor="middle" font-weight="bold">' + label + '</text>';
+      svg += '<text x="' + x + '" y="' + (y + 3.5) + '" font-size="7" fill="' + cs.getPropertyValue('--pill-text').trim() + '" font-family="monospace" text-anchor="middle" font-weight="bold">' + label + '</text>';
     }
   }
 
@@ -966,6 +966,7 @@ function buildScaleFretboard(rootName, scaleName){
   const fsv = cs.getPropertyValue('--fret-string').trim();
   const a2 = cs.getPropertyValue('--accent2').trim();
   const mu = cs.getPropertyValue('--muted').trim();
+  const pt = cs.getPropertyValue('--pill-text').trim();
 
   const strings = [
     {note:'E',oct:4,label:'e'},{note:'B',oct:3,label:'B'},
@@ -1022,7 +1023,7 @@ function buildScaleFretboard(rootName, scaleName){
       const col = openPc === rootPc ? fd : a2;
       const label = degreeMap.get(openPc) || NOTES[openPc];
       c += '<circle cx="' + (nutX - 14) + '" cy="' + y + '" r="9" fill="' + col + '" opacity="0.92"/>';
-      c += '<text x="' + (nutX - 14) + '" y="' + (y + 3.5) + '" font-size="7.5" fill="#000" font-family="monospace" text-anchor="middle" font-weight="bold">' + label + '</text>';
+      c += '<text x="' + (nutX - 14) + '" y="' + (y + 3.5) + '" font-size="7.5" fill="' + pt + '" font-family="monospace" text-anchor="middle" font-weight="bold">' + label + '</text>';
       hitData.push({x: nutX - 14, y, freq: midiFreq(openMidi)});
     }
 
@@ -1034,7 +1035,7 @@ function buildScaleFretboard(rootName, scaleName){
       const col = pc === rootPc ? fd : a2;
       const label = degreeMap.get(pc) || NOTES[pc];
       c += '<circle cx="' + x + '" cy="' + y + '" r="9.5" fill="' + col + '" opacity="0.92"/>';
-      c += '<text x="' + x + '" y="' + (y + 3.5) + '" font-size="7.5" fill="#000" font-family="monospace" text-anchor="middle" font-weight="bold">' + label + '</text>';
+      c += '<text x="' + x + '" y="' + (y + 3.5) + '" font-size="7.5" fill="' + pt + '" font-family="monospace" text-anchor="middle" font-weight="bold">' + label + '</text>';
       hitData.push({x, y, freq: midiFreq(midi)});
     }
   });
@@ -1198,6 +1199,8 @@ function setMode(mode){
 }
 
 // ── AUDIO PLAYBACK ──
+function semitoneOct(s){ return s >= 12 ? 4 : 3; }
+
 function playChord(){
   const root = document.getElementById('chordRoot').value;
   const type = document.getElementById('chordType').value;
@@ -1205,8 +1208,7 @@ function playChord(){
   const ctx = getCtx();
   const t0 = ctx.currentTime + 0.05;
   notes.forEach(n => {
-    const oct = n.semitone >= 12 ? 4 : 3;
-    playTone(noteFreq(n.note, oct), t0, 1.2);
+    playTone(noteFreq(n.note, semitoneOct(n.semitone)), t0, 1.2);
   });
 }
 
@@ -1217,8 +1219,7 @@ function playArpeggiate(){
   const ctx = getCtx();
   const gap = 0.15;
   notes.forEach((n, i) => {
-    const oct = n.semitone >= 12 ? 4 : 3;
-    playTone(noteFreq(n.note, oct), ctx.currentTime + 0.05 + i * gap, 0.8);
+    playTone(noteFreq(n.note, semitoneOct(n.semitone)), ctx.currentTime + 0.05 + i * gap, 0.8);
   });
 }
 
@@ -1231,8 +1232,7 @@ function playScaleAsc(){
   const gap = 0.18;
   intervals.forEach((s, i) => {
     const noteIdx = (rootIdx + (s % 12)) % 12;
-    const oct = s >= 12 ? 4 : 3;
-    playTone(noteFreq(NOTES[noteIdx], oct), ctx.currentTime + 0.05 + i * gap, 0.6);
+    playTone(noteFreq(NOTES[noteIdx], semitoneOct(s)), ctx.currentTime + 0.05 + i * gap, 0.6);
   });
 }
 
@@ -1245,8 +1245,7 @@ function playScaleDesc(){
   const gap = 0.18;
   intervals.forEach((s, i) => {
     const noteIdx = (rootIdx + (s % 12)) % 12;
-    const oct = s >= 12 ? 4 : 3;
-    playTone(noteFreq(NOTES[noteIdx], oct), ctx.currentTime + 0.05 + i * gap, 0.6);
+    playTone(noteFreq(NOTES[noteIdx], semitoneOct(s)), ctx.currentTime + 0.05 + i * gap, 0.6);
   });
 }
 
