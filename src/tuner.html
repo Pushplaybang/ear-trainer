@@ -24,7 +24,8 @@
 .content{max-width:700px;}
 
 /* ── MAIN TUNER DISPLAY ── */
-.tuner-display{background:var(--meter-bg);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;width:100%;position:relative;margin-bottom:16px;}
+.tuner-display{background:var(--meter-bg);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;width:100%;position:relative;margin-bottom:16px;transition:box-shadow .3s;}
+.tuner-display.in-tune{box-shadow:0 0 0 2px var(--correct),0 0 20px var(--correct-glow);}
 
 /* ── PITCH TRACE ── */
 .strobe-container{position:relative;height:72px;overflow:hidden;background:var(--meter-bg);}
@@ -34,10 +35,10 @@
 
 /* ── NOTE + CENTS READOUT ── */
 .note-readout{display:flex;align-items:center;justify-content:center;gap:0;padding:18px 20px 14px;position:relative;}
-.note-name{font-family:var(--font-h);font-size:clamp(3.5rem,12vw,5.5rem);color:var(--note-disp);line-height:1;font-weight:400;letter-spacing:-.02em;transition:color .2s;min-width:100px;text-align:center;}
+.note-name{font-family:var(--font-b);font-size:clamp(3rem,10vw,4rem);color:var(--note-disp);line-height:1;font-weight:300;letter-spacing:-.02em;transition:color .2s;min-width:100px;text-align:center;}
 .note-sharp{font-size:0.42em;vertical-align:super;margin-left:2px;color:var(--accent);}
 .octave-num{font-family:var(--font-b);font-size:.9rem;color:var(--muted);margin-left:6px;margin-top:auto;margin-bottom:12px;}
-.freq-readout{position:absolute;right:20px;bottom:18px;font-family:var(--font-b);font-size:.72rem;color:var(--muted);letter-spacing:.06em;text-align:right;}
+.freq-readout{position:absolute;right:20px;bottom:18px;font-family:var(--font-b);font-size:.8rem;font-weight:500;color:var(--accent);letter-spacing:.06em;text-align:right;text-shadow:0 0 8px var(--accent-glow);}
 .freq-readout span{display:block;font-size:.58rem;letter-spacing:.1em;opacity:.6;margin-bottom:2px;}
 
 /* ── NEEDLE METER ── */
@@ -47,7 +48,7 @@
 .meter-zone-flat{position:absolute;left:0;top:0;width:45%;height:100%;background:linear-gradient(90deg,transparent,rgba(75,138,232,0.18));border-radius:4px 0 0 4px;}
 .meter-zone-sharp{position:absolute;right:0;top:0;width:45%;height:100%;background:linear-gradient(90deg,rgba(232,75,75,0.18),transparent);border-radius:0 4px 4px 0;}
 .meter-zone-center{position:absolute;left:50%;transform:translateX(-50%);top:-2px;height:12px;width:16px;border-radius:2px;background:var(--correct);opacity:.25;}
-.meter-needle{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--needle);transform:translate(-50%,-50%);transition:left .05s cubic-bezier(.25,.46,.45,.94),background .3s;box-shadow:0 0 0 2px var(--meter-bg),0 0 8px var(--needle);}
+.meter-needle{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--needle);transform:translate(-50%,-50%);transition:left 0.22s cubic-bezier(0.34,1.56,0.64,1),background .3s,box-shadow .3s;box-shadow:0 0 0 2px var(--meter-bg),0 0 8px var(--needle);}
 .cents-readout{text-align:center;margin-top:10px;font-family:var(--font-b);font-size:.78rem;letter-spacing:.06em;height:18px;transition:color .2s;}
 .cents-readout.in-tune{color:var(--cents-in);}
 .cents-readout.sharp{color:var(--cents-sharp);}
@@ -65,18 +66,23 @@
 .mic-btn.active{border-color:var(--accent);background:var(--accent);box-shadow:0 0 0 0 var(--accent);animation:pulseRing 2s ease-out infinite;}
 .mic-btn.active::after{opacity:0;}
 @keyframes pulseRing{
-  0%{box-shadow:0 0 0 0 rgba(var(--accent-rgb,.5,0.4));}
-  70%{box-shadow:0 0 0 16px rgba(0,0,0,0);}
-  100%{box-shadow:0 0 0 0 rgba(0,0,0,0);}
+  0%{box-shadow:0 0 0 0 var(--accent-glow);}
+  70%{box-shadow:0 0 0 16px transparent;}
+  100%{box-shadow:0 0 0 0 transparent;}
 }
+@keyframes pulseInTune{
+  0%,100%{box-shadow:0 0 0 2px var(--correct),0 0 20px var(--correct-glow);}
+  50%{box-shadow:0 0 0 3px var(--correct),0 0 28px var(--correct-glow);}
+}
+.tuner-display.in-tune.pulse{animation:pulseInTune 1.8s ease-in-out infinite;}
 .mic-btn-label{font-family:var(--font-b);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
 .mic-status{font-family:var(--font-b);font-size:.65rem;color:var(--muted);letter-spacing:.06em;height:14px;text-align:center;}
 
 /* ── STRING BUTTONS ── */
 .string-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:14px;}
-.str-btn{font-family:var(--font-b);font-size:.68rem;padding:7px 0;border-radius:var(--br);border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;transition:all .2s;flex:1;min-width:44px;text-align:center;letter-spacing:.04em;}
+.str-btn{font-family:var(--font-b);font-size:.62rem;width:48px;min-width:48px;height:52px;padding:4px 0;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;transition:all 0.18s var(--spring);text-align:center;letter-spacing:.04em;box-shadow:var(--neu-out);flex:0 0 auto;}
 .str-btn:hover{border-color:var(--accent);color:var(--accent);}
-.str-btn.active{background:var(--accent);color:var(--pill-text);border-color:var(--accent);font-weight:700;}
+.str-btn.active{background:var(--accent);color:var(--pill-text);border-color:var(--accent);font-weight:700;transform:scale(1.08);}
 
 /* ── TUNING PRESETS ── */
 .preset-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;}
@@ -133,7 +139,7 @@ button{font-family:var(--font-b);cursor:pointer;}
 .autodetect-note{font-family:var(--font-b);font-size:.62rem;color:var(--muted);letter-spacing:.06em;margin-top:6px;min-height:16px;text-align:center;}
 @media(max-width:600px){
   .bar-icon-btn{width:44px;height:44px;}
-  .str-btn{min-height:44px;}
+  .str-btn{width:48px;min-width:48px;height:52px;}
   .calib-btn{width:44px;height:44px;}
 }
 @media(max-width:480px){
@@ -192,7 +198,7 @@ button{font-family:var(--font-b);cursor:pointer;}
   </header>
 
   <!-- MAIN TUNER DISPLAY -->
-  <div class="tuner-display">
+  <div class="tuner-display" id="tunerDisplay">
     <div class="in-tune-ring" id="inTuneLed"></div>
     <!-- Pitch history trace -->
     <div class="strobe-container">
@@ -546,6 +552,7 @@ function resetDisplay(){
   document.getElementById('centsDisplay').className='cents-readout';
   document.getElementById('meterNeedle').style.left='50%';
   document.getElementById('inTuneLed').classList.remove('lit');
+  var td=document.getElementById('tunerDisplay');if(td){td.classList.remove('in-tune','pulse');}
   var pitchFill=document.getElementById('pitchBarFill');var pitchVal=document.getElementById('pitchBarVal');
   if(pitchFill)pitchFill.style.width='50%';if(pitchVal)pitchVal.textContent='—';
 }
@@ -616,6 +623,7 @@ function updateTunerDisplay(note,oct,freq,cents,autodetect,smoothed){
   const needle=document.getElementById('meterNeedle');
   const inTune=Math.abs(cents)<=2;
   if(inTune){needle.style.background='var(--cents-in)';needle.style.boxShadow='0 0 0 2px var(--meter-bg),0 0 12px var(--cents-in)';}
+  else if(Math.abs(cents)>15){needle.style.background=cents>0?'var(--cents-sharp)':'var(--cents-flat)';needle.style.boxShadow='0 0 0 2px var(--meter-bg),0 0 12px var(--wrong-glow)';}
   else if(cents>0){needle.style.background='var(--cents-sharp)';needle.style.boxShadow='0 0 0 2px var(--meter-bg),0 0 8px var(--cents-sharp)';}
   else{needle.style.background='var(--cents-flat)';needle.style.boxShadow='0 0 0 2px var(--meter-bg),0 0 8px var(--cents-flat)';}
   // Cents text uses raw rounded integer
@@ -624,6 +632,8 @@ function updateTunerDisplay(note,oct,freq,cents,autodetect,smoothed){
   else if(cents>0){cd.textContent='+'+cents+'¢ sharp';cd.className='cents-readout sharp';}
   else{cd.textContent=cents+'¢ flat';cd.className='cents-readout flat';}
   document.getElementById('inTuneLed').classList.toggle('lit',inTune);
+  const tunerDisp=document.getElementById('tunerDisplay');
+  if(tunerDisp){tunerDisp.classList.toggle('in-tune',inTune);tunerDisp.classList.toggle('pulse',inTune&&Math.abs(cents)<5);}
   // Update pitch deviation bar
   var pitchFill = document.getElementById('pitchBarFill');
   var pitchVal = document.getElementById('pitchBarVal');
