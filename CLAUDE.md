@@ -16,9 +16,10 @@ Browser-based music practice tools for everyday use. Each tool is a single self-
 ## Repository structure
 music-tools/
 ├── CLAUDE.md              ← You are here. Claude Code reads this automatically.
-├── music-tools.css        # Shared design system (tokens, components, chrome)
 ├── index.html             # Collection home/landing page
 ├── src/
+│   ├── style/
+│   │   └── music-tools.css  # Shared design system (tokens, components, chrome)
 │   ├── ear-trainer.html   # LS key: earTrainer_v6
 │   ├── tuner.html         # LS key: musicTool_StrobeTuner_v1
 │   ├── pulse.html         # LS key: musicTool_pulse_v1

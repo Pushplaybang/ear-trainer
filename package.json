@@ -2,6 +2,7 @@
   "name": "music-tools",
   "version": "1.0.0",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "kill-server": "lsof -ti :3000 | xargs kill -9"
   }
 }
