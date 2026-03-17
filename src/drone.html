@@ -29,7 +29,7 @@
 }
 .drone-ring:hover{border-color:var(--accent);}
 .drone-ring.active{border-color:var(--accent);box-shadow:var(--neu-out),0 0 18px var(--accent-glow);}
-.drone-ring.active::before{opacity:0.6;animation:droneSpin 8s linear infinite;}
+.drone-ring.active::before{opacity:0.6;animation:droneSpin 8s linear infinite,dronePulse 2s ease-in-out infinite;}
 .drone-ring.active .drone-ring-icon{color:var(--accent);}
 .drone-ring.active .drone-ring-icon{animation:dronePulse 2s ease-in-out infinite;}
 @keyframes dronePulse{
@@ -37,6 +37,8 @@
   50%{transform:scale(1.12);opacity:0.5;}
 }
 @keyframes droneSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.play-section:has(.drone-ring.active) ~ .note-display{animation:notePulse 2s ease-in-out infinite;}
+@keyframes notePulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.15)}}
 .drone-ring-icon{position:relative;z-index:1;line-height:1;pointer-events:none;color:var(--muted);transition:color .25s;}
 .play-label{font-family:var(--font-b);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
 

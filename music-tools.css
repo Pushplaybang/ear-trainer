@@ -78,7 +78,7 @@ html{-webkit-text-size-adjust:100%;}
 body{
   background:var(--bg);color:var(--text);font-family:var(--font-b);
   min-height:100vh;display:flex;flex-direction:column;align-items:center;
-  padding-bottom:48px;transition:background .35s,color .35s;
+  padding-bottom:48px;transition:background 0.3s,color 0.3s;
 }
 body::before{content:'';position:fixed;inset:0;background:var(--bg-grad);pointer-events:none;z-index:0;}
 
@@ -157,7 +157,7 @@ button{font-family:var(--font-b);font-size:.72rem;letter-spacing:.06em;border:no
 .progress-val{font-family:var(--font-b,monospace);font-size:.68rem;font-weight:500;color:var(--accent);}
 .progress-track{height:5px;border-radius:3px;background:var(--surface-lo2);box-shadow:var(--neu-in);position:relative;overflow:hidden;}
 .progress-track.thin{height:3px;}
-.progress-fill{position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:3px;box-shadow:0 0 8px var(--accent-glow);transition:width .3s ease;}
+.progress-fill{position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:3px;box-shadow:0 0 8px var(--accent-glow);transition:width .3s ease,box-shadow .3s ease;}
 .progress-track.block .progress-fill{background:linear-gradient(90deg,var(--correct),var(--accent));box-shadow:0 0 6px var(--correct-glow);}
 
 /* Status bar (simple) */
@@ -281,6 +281,22 @@ input[type=text]{cursor:text;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--text-3);border-radius:3px;}
 
+/* ── CHROME MARK ─────────────────────────────────────────── */
+.chrome-mark{transition:box-shadow 0.3s;}
+
+/* ── ENTRY ANIMATIONS ─────────────────────────────────────── */
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card,.tool-panel{animation:fadeSlideUp 0.45s ease both;}
+
+/* ── SHAKE ANIMATION ──────────────────────────────────────── */
+@keyframes shakeX{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+/* ── TOOL PANEL ACCENT LINE HOVER ─────────────────────────── */
+.tool-panel:hover::before{opacity:0.65;}
+
+/* ── FOCUS ACCESSIBILITY ──────────────────────────────────── */
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+
 /* ── RESPONSIVE: TOUCH TARGETS ───────────────────────────────── */
 @media(max-width:600px){
   .bar-icon-btn{width:44px;height:44px;}
@@ -290,4 +306,9 @@ input[type=text]{cursor:text;}
 @media(max-width:480px){
   .modal-card{padding:20px 16px;}
   .doc-body{overflow-y:auto;max-height:60vh;}
+}
+
+/* ── REDUCED MOTION ───────────────────────────────────────── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.01ms !important;transition-duration:0.1ms !important;}
 }
