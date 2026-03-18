@@ -129,8 +129,10 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
 [data-mode="dark"] .app-layout>.card:hover{box-shadow:0 12px 40px rgba(0,0,0,.4),0 0 0 1px var(--border);}
 
 /* ── APP LAYOUT: 3-col on desktop, stacked on mobile ── */
-.app-layout{display:grid;gap:16px;grid-template-columns:1fr;}
+.app-layout{display:grid;gap:16px;grid-template-columns:1fr;width:100%;}
+.app-layout>.card{margin-bottom:0;} /* grid gap replaces margin */
 @media(min-width:900px){
+  .content{max-width:1200px;}
   .app-layout{
     grid-template-columns:220px 1fr 220px;
     grid-template-rows:auto auto;
