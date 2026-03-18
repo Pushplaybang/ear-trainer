@@ -26,7 +26,8 @@ jobs:
           # Pattern matches known agent bot names (literal "[bot]" requires escaping) and Copilot noreply email.
           # Escaped brackets keep the literal "[bot]" intact through YAML and grep regex parsing.
           # Keep this list explicit to avoid matching non-agent bots like dependabot or renovate.
-          AGENT_AUTHOR_PATTERN: "(copilot-swe-agent\\[bot\\]|copilot-swe\\[bot\\]|copilot\\[bot\\]|swe-agent\\[bot\\]|copilot@users\\.noreply\\.github\\.com)"
+          # Use [cC] for Copilot to handle name/email capitalisation variations without case-insensitive matching.
+          AGENT_AUTHOR_PATTERN: "([cC]opilot-swe-agent\\[bot\\]|[cC]opilot-swe\\[bot\\]|[cC]opilot\\[bot\\]|swe-agent\\[bot\\]|[cC]opilot@users\\.noreply\\.github\\.com)"
         run: |
           BASE_SHA=${{ github.event.pull_request.base.sha }}
           HEAD_SHA=${{ github.event.pull_request.head.sha }}
@@ -41,8 +42,7 @@ jobs:
           # Format is subject<TAB>author name<TAB>author email (matches git log format below).
           while IFS=$'\t' read -r MSG AUTHOR EMAIL; do
             AUTHOR_INFO="${AUTHOR} <${EMAIL}>"
-            # Case-insensitive match handles name/email capitalisation variations (e.g., "Copilot").
-            if [ -n "$AGENT_AUTHOR_PATTERN" ] && echo "$AUTHOR_INFO" | grep -qiE "$AGENT_AUTHOR_PATTERN"; then
+            if [ -n "$AGENT_AUTHOR_PATTERN" ] && echo "$AUTHOR_INFO" | grep -qE "$AGENT_AUTHOR_PATTERN"; then
               echo "🤖 $MSG  (agent commit by $AUTHOR_INFO, skipped)"
               AGENT_COMMITS=$((AGENT_COMMITS + 1))
               continue
@@ -91,7 +91,7 @@ jobs:
               '',
               '**Copy/paste Conventional Commit title (scope optional):**',
               '```',
-              'feat: short description of the change',
+              'fix: short description of the change',
               '```',
               '**Example (copy/paste):**',
               '```',
