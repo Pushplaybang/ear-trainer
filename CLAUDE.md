@@ -5,7 +5,8 @@ Browser-based music practice tools for everyday use. Each tool is a single self-
 
 ## Hard constraints — NEVER violate these
 - Every tool is ONE `.html` file in `src/` containing HTML and JS inline, linking to `music-tools.css` for shared styles
-- All shared CSS lives in `music-tools.css` — never duplicate token blocks in tool HTML
+- All shared CSS lives in `src/style/music-tools.css` — never duplicate token blocks in tool HTML
+- Tool HTML links to the shared CSS via `<link rel="stylesheet" href="style/music-tools.css">` (relative from `src/`)
 - Tool HTML `<style>` blocks contain ONLY tool-specific CSS
 - Zero runtime dependencies. No npm imports, no CDN scripts, no frameworks
 - No user data collection, no analytics, no cookies, no server communication
@@ -41,7 +42,7 @@ music-tools/
 
 ## Design system — Stasis v3 two-mode (light / dark)
 Two-mode token system using `[data-mode="light"]` and `[data-mode="dark"]` selectors.
-Fonts: Syne (headings) + DM Mono (body/mono). Tokens defined in `music-tools.css`.
+Fonts: Syne (headings) + DM Mono (body/mono). Tokens defined in `src/style/music-tools.css`.
 
 See music-tools-boilerplate.html for the canonical reference. NEVER hardcode colours — always use CSS custom properties. After ANY CSS change, verify both modes render correctly.
 
