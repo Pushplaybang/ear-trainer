@@ -121,6 +121,13 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
   .config-panel.open{max-height:500px;}
 }
 
+/* ── KNOBS ── */
+.knob-row{display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:center;padding:8px 0;}
+.knob-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;}
+.knob-label{font-family:var(--font-b);font-size:.5rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.knob-value{font-family:var(--font-b);font-size:.62rem;font-weight:500;color:var(--accent);}
+.knob-svg{cursor:ns-resize;}
+
 /* ── SESSION ── */
 /* ── SCORE OVERLAY (v3) ── */
 #scoreOverlay .modal-card{box-shadow:0 0 0 1px var(--border),0 0 32px var(--accent-glow);}
@@ -210,7 +217,7 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
       </ul>
       <h3>Sound &amp; Timer</h3>
       <ul>
-        <li><strong>Sound</strong> — <em>Synth 1</em> (default: percussive noise burst + sine, bright), <em>Synth 2</em> (triangle + harmonic, classic), or <em>Synth 3</em> (warm organ-like sine with sub-octave).</li>
+        <li><strong>Sound</strong> — Choose <em>Timbre</em> (Synth 1/2/3) and <em>Layer</em> (octave, fifth, chorus, sub). Eight knobs shape the tone: <strong>VOL</strong> (volume), <strong>BRT</strong> (brightness/filter cutoff), <strong>ATK</strong> (attack), <strong>REL</strong> (release), <strong>NSE</strong> (noise layer), <strong>RVB</strong> (reverb), <strong>F.ENV</strong> (filter envelope — below 50 sweeps bright→dark, above 50 sweeps dark→bright), <strong>N.TNE</strong> (noise tone — breathy at 0, pitched at 100). Drag knobs vertically to adjust. Hit <strong>⚄</strong> to randomise all sound params.</li>
         <li><strong>Play reference first</strong> — Note Names: plays root. Intervals: plays the reference note before the mystery note. Not used in Chord mode.</li>
         <li><strong>Timer</strong> — Off, 5s, 10s, 15s, or 20s. The countdown ring turns red at 3 seconds. Timeouts count against accuracy.</li>
       </ul>
@@ -329,17 +336,12 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
 
   <!-- Sound -->
   <div class="card">
-    <div class="card-title">// Sound</div>
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;"><span>// Sound</span><button class="btn-icon-sm" onclick="randomiseSound()" title="Randomise sound">⚄</button></div>
     <div class="controls cols2">
       <div class="control-group"><label>Timbre</label><select id="timbreSelect"><option value="piano">Synth 1</option><option value="synth">Synth 2</option><option value="soft">Synth 3</option></select></div>
       <div class="control-group"><label>Layer</label><select id="layerSelect" onchange="updateSoundParam('toneLayer',this.value,'_none')"><option value="none">None</option><option value="octave">+Octave</option><option value="fifth">+Fifth</option><option value="detune">Detune (chorus)</option><option value="sub">Sub (−1 oct)</option></select></div>
-      <div class="slider-group"><label>Volume <span class="slider-val" id="sndVolVal">80%</span></label><input type="range" id="sndVolSlider" min="0" max="100" value="80" oninput="updateSoundParam('toneVolume',this.value,'sndVolVal')"></div>
-      <div class="slider-group"><label>Brightness <span class="slider-val" id="sndBrightVal">50%</span></label><input type="range" id="sndBrightSlider" min="0" max="100" value="50" oninput="updateSoundParam('toneBrightness',this.value,'sndBrightVal')"></div>
-      <div class="slider-group"><label>Attack <span class="slider-val" id="sndAtkVal">10%</span></label><input type="range" id="sndAtkSlider" min="0" max="100" value="10" oninput="updateSoundParam('toneAttack',this.value,'sndAtkVal')"></div>
-      <div class="slider-group"><label>Release <span class="slider-val" id="sndRelVal">50%</span></label><input type="range" id="sndRelSlider" min="0" max="100" value="50" oninput="updateSoundParam('toneRelease',this.value,'sndRelVal')"></div>
-      <div class="slider-group"><label>Noise <span class="slider-val" id="sndNoiseVal">0%</span></label><input type="range" id="sndNoiseSlider" min="0" max="100" value="0" oninput="updateSoundParam('toneNoise',this.value,'sndNoiseVal')"></div>
-      <div class="slider-group"><label>Reverb <span class="slider-val" id="sndReverbVal">15%</span></label><input type="range" id="sndReverbSlider" min="0" max="100" value="15" oninput="updateSoundParam('toneReverb',this.value,'sndReverbVal')"></div>
     </div>
+    <div class="knob-row" id="soundKnobRow"></div>
   </div>
 </div>
 <div class="app-footer">made with ♥ by Paul van Zyl</div>
@@ -384,6 +386,8 @@ function applyMode(m,noSave){
   const badge=document.getElementById('modeBadge');
   if(badge) badge.textContent=m==='dark'?'DARK':'LIGHT';
   if(!noSave) savePref('mode',m);
+  // Refresh knob theming
+  Object.keys(soundKnobRefs).forEach(function(k){if(soundKnobRefs[k])soundKnobRefs[k].refresh();});
 }
 document.getElementById('modeToggle').addEventListener('click',()=>{
   applyMode(document.body.dataset.mode==='dark'?'light':'dark');
@@ -433,12 +437,15 @@ function updateTuningVisibility(){
 
 // ══ AUDIO ══
 let audioCtx=null,currentTimbre='piano';
-let toneVolume=80,toneBrightness=50,toneAttack=10,toneRelease=50,toneNoise=0,toneReverb=15,toneLayer='none';
+let toneVolume=80,toneBrightness=50,toneAttack=10,toneRelease=50,toneNoise=0,toneReverb=15,toneLayer='none',toneFilterEnv=50,toneNoiseTone=50;
 let reverbNode=null;
+var soundKnobRefs={};
 function getVolume(){return toneVolume/100;}
 function getBrightness(){return 200+(toneBrightness/100)*7800;}
 function getAttackTime(){return 0.005+(toneAttack/100)*0.295;}
 function getReleaseTime(){return 0.2+(toneRelease/100)*2.8;}
+function getFilterEnvAmount(){return (toneFilterEnv-50)/50;} // -1 to +1
+function getNoiseToneQ(){return 0.3+(toneNoiseTone/100)*11.7;}
 function updateSoundParam(key,val,elId){
   if(key==='toneLayer'){toneLayer=val;savePref(key,val);return;}
   val=+val;
@@ -448,8 +455,91 @@ function updateSoundParam(key,val,elId){
   else if(key==='toneRelease')toneRelease=val;
   else if(key==='toneNoise')toneNoise=val;
   else if(key==='toneReverb'){toneReverb=val;reverbNode=null;}
-  if(elId!=='_none'){var el=document.getElementById(elId);if(el)el.textContent=val+'%';}
+  else if(key==='toneFilterEnv')toneFilterEnv=val;
+  else if(key==='toneNoiseTone')toneNoiseTone=val;
   savePref(key,val);
+}
+// ── SVG Knob builder (adapted from design system v3) ──
+function buildKnob(container,label,initPct,onChange){
+  var SIZE=60,RT=20,RI=15,START=220,RANGE=280;
+  var val=initPct/100,drag=false,sY=0,sV=0;
+  var NS='http://www.w3.org/2000/svg';
+  var wrap=document.createElement('div');wrap.className='knob-wrap';
+  var lbl=document.createElement('div');lbl.className='knob-label';lbl.textContent=label;
+  var valEl=document.createElement('div');valEl.className='knob-value';valEl.textContent=Math.round(val*100);
+  var svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('width',SIZE);svg.setAttribute('height',SIZE);
+  svg.setAttribute('viewBox','0 0 '+SIZE+' '+SIZE);svg.classList.add('knob-svg');svg.style.overflow='visible';
+  var defs=document.createElementNS(NS,'defs');
+  var grd=document.createElementNS(NS,'radialGradient');
+  var gid='ksh_'+Math.random().toString(36).slice(2);
+  grd.id=gid;grd.setAttribute('cx','38%');grd.setAttribute('cy','30%');grd.setAttribute('r','58%');
+  var gs1=document.createElementNS(NS,'stop');gs1.setAttribute('offset','0%');
+  var gs2=document.createElementNS(NS,'stop');gs2.setAttribute('offset','100%');gs2.setAttribute('stop-color','rgba(255,255,255,0)');
+  grd.appendChild(gs1);grd.appendChild(gs2);defs.appendChild(grd);svg.appendChild(defs);
+  var cx=SIZE/2,cy=SIZE/2;
+  var trackEl=document.createElementNS(NS,'path');trackEl.setAttribute('stroke-width','2.5');trackEl.setAttribute('fill','none');trackEl.setAttribute('stroke-linecap','round');
+  var fillEl=document.createElementNS(NS,'path');fillEl.setAttribute('stroke-width','2.5');fillEl.setAttribute('fill','none');fillEl.setAttribute('stroke-linecap','round');
+  var bodyEl=document.createElementNS(NS,'circle');bodyEl.setAttribute('cx',cx);bodyEl.setAttribute('cy',cy);bodyEl.setAttribute('r',RI);
+  var shineEl=document.createElementNS(NS,'circle');shineEl.setAttribute('cx',cx);shineEl.setAttribute('cy',cy);shineEl.setAttribute('r',RI);shineEl.setAttribute('fill','url(#'+gid+')');
+  var indEl=document.createElementNS(NS,'line');indEl.setAttribute('stroke-width','1.5');indEl.setAttribute('stroke-linecap','round');
+  [trackEl,fillEl,bodyEl,shineEl,indEl].forEach(function(el){svg.appendChild(el);});
+  function arc(r,a1,a2){var s=(a1-90)*Math.PI/180,e=(a2-90)*Math.PI/180,lg=a2-a1>180?1:0;return 'M'+(cx+r*Math.cos(s))+' '+(cy+r*Math.sin(s))+' A '+r+' '+r+' 0 '+lg+' 1 '+(cx+r*Math.cos(e))+' '+(cy+r*Math.sin(e));}
+  function isDark(){return document.body.dataset.mode==='dark';}
+  function getCSS(v){return getComputedStyle(document.body).getPropertyValue(v).trim();}
+  function styleMode(){
+    var dark=isDark();
+    trackEl.setAttribute('stroke',dark?'rgba(100,140,255,0.10)':'rgba(55,85,180,0.10)');
+    var acc=getCSS('--accent');
+    fillEl.setAttribute('stroke',acc);
+    fillEl.setAttribute('filter','drop-shadow(0 0 3px '+(dark?'rgba(0,216,255,0.48)':'rgba(0,128,192,0.32)')+')');
+    bodyEl.setAttribute('fill',getCSS('--surface-hi'));
+    bodyEl.setAttribute('filter',dark
+      ?'drop-shadow(3px 4px 14px rgba(0,0,0,0.65)) drop-shadow(-1px -1px 2px rgba(255,255,255,0.035))'
+      :'drop-shadow(3px 4px 12px rgba(40,60,150,0.13)) drop-shadow(-3px -3px 8px rgba(255,255,255,0.92))');
+    gs1.setAttribute('stop-color',dark?'rgba(255,255,255,0.04)':'rgba(255,255,255,0.40)');
+    indEl.setAttribute('stroke',acc);
+  }
+  function update(){
+    styleMode();
+    var ang=START+val*RANGE;
+    trackEl.setAttribute('d',arc(RT,START,START+RANGE));
+    fillEl.setAttribute('d',val>0.01?arc(RT,START,ang):'M0 0');
+    var rad=(ang-90)*Math.PI/180;
+    indEl.setAttribute('x1',cx+(RI-8)*Math.cos(rad));indEl.setAttribute('y1',cy+(RI-8)*Math.sin(rad));
+    indEl.setAttribute('x2',cx+(RI-3)*Math.cos(rad));indEl.setAttribute('y2',cy+(RI-3)*Math.sin(rad));
+    valEl.textContent=Math.round(val*100);
+  }
+  svg.addEventListener('mousedown',function(e){drag=true;sY=e.clientY;sV=val;e.preventDefault();});
+  window.addEventListener('mousemove',function(e){if(drag){var nv=Math.max(0,Math.min(1,sV-(e.clientY-sY)/110));if(nv!==val){val=nv;update();onChange(Math.round(val*100));}}});
+  window.addEventListener('mouseup',function(){drag=false;});
+  svg.addEventListener('touchstart',function(e){drag=true;sY=e.touches[0].clientY;sV=val;},{passive:true});
+  window.addEventListener('touchmove',function(e){if(drag){var nv=Math.max(0,Math.min(1,sV-(e.touches[0].clientY-sY)/110));if(nv!==val){val=nv;update();onChange(Math.round(val*100));}}},{passive:true});
+  window.addEventListener('touchend',function(){drag=false;});
+  wrap.appendChild(svg);wrap.appendChild(lbl);wrap.appendChild(valEl);
+  container.appendChild(wrap);update();
+  return {
+    setValue:function(pct){val=Math.max(0,Math.min(1,pct/100));update();},
+    getValue:function(){return Math.round(val*100);},
+    refresh:function(){update();}
+  };
+}
+function buildSoundKnobs(){
+  var row=document.getElementById('soundKnobRow');if(!row)return;row.innerHTML='';
+  soundKnobRefs={};
+  var knobs=[
+    {key:'toneVolume',label:'VOL',def:80},
+    {key:'toneBrightness',label:'BRT',def:50},
+    {key:'toneAttack',label:'ATK',def:10},
+    {key:'toneRelease',label:'REL',def:50},
+    {key:'toneNoise',label:'NSE',def:0},
+    {key:'toneReverb',label:'RVB',def:15},
+    {key:'toneFilterEnv',label:'F.ENV',def:50},
+    {key:'toneNoiseTone',label:'N.TNE',def:50}
+  ];
+  knobs.forEach(function(k){
+    soundKnobRefs[k.key]=buildKnob(row,k.label,k.def,function(v){updateSoundParam(k.key,v);});
+  });
 }
 function getReverbNode(){
   if(reverbNode)return reverbNode;
@@ -464,7 +554,18 @@ function _playToneImpl(f,t0,dur,dest){
   const totalDur=dur+rel;
   // Master chain: mg → lp → dry/wet split
   const mg=ctx.createGain();mg.gain.value=vol;
-  const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=bright;
+  const lp=ctx.createBiquadFilter();lp.type='lowpass';
+  // Filter envelope: sweep cutoff over note duration
+  const fEnv=getFilterEnvAmount(); // -1 to +1
+  if(Math.abs(fEnv)>0.02){
+    const lo=200,hi=bright;
+    const startF=fEnv<0?hi:Math.max(lo,hi*(1-Math.abs(fEnv)));
+    const endF=fEnv<0?Math.max(lo,hi*(1-Math.abs(fEnv))):hi;
+    lp.frequency.setValueAtTime(startF,t0);
+    lp.frequency.exponentialRampToValueAtTime(Math.max(20,endF),t0+totalDur*0.8);
+  } else {
+    lp.frequency.value=bright;
+  }
   mg.connect(lp);
   // Reverb send (wet/dry)
   const rvbAmt=toneReverb/100;
@@ -523,7 +624,7 @@ function _playToneImpl(f,t0,dur,dest){
     const nBufLen=Math.ceil(ctx.sampleRate*totalDur),nBuf=ctx.createBuffer(1,nBufLen,ctx.sampleRate);
     const nd=nBuf.getChannelData(0);for(let i=0;i<nBufLen;i++)nd[i]=(Math.random()*2-1);
     const nSrc=ctx.createBufferSource();nSrc.buffer=nBuf;
-    const nFilt=ctx.createBiquadFilter();nFilt.type='bandpass';nFilt.frequency.value=f;nFilt.Q.value=1;
+    const nFilt=ctx.createBiquadFilter();nFilt.type='bandpass';nFilt.frequency.value=f;nFilt.Q.value=getNoiseToneQ();
     const nGain=ctx.createGain();
     nGain.gain.setValueAtTime(0,t0);nGain.gain.linearRampToValueAtTime(nAmt,t0+atk);
     nGain.gain.exponentialRampToValueAtTime(0.001,t0+totalDur);
@@ -668,18 +769,17 @@ function restoreSettings(){
     currentQuizMode=p.quizMode;
     document.querySelectorAll('.quiz-mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===p.quizMode));
   }
-  // Restore tone-shaping params
-  [{k:'toneVolume',v:80,sl:'sndVolSlider',el:'sndVolVal',fn:function(v){toneVolume=v;}},
-   {k:'toneBrightness',v:50,sl:'sndBrightSlider',el:'sndBrightVal',fn:function(v){toneBrightness=v;}},
-   {k:'toneAttack',v:10,sl:'sndAtkSlider',el:'sndAtkVal',fn:function(v){toneAttack=v;}},
-   {k:'toneRelease',v:50,sl:'sndRelSlider',el:'sndRelVal',fn:function(v){toneRelease=v;}},
-   {k:'toneNoise',v:0,sl:'sndNoiseSlider',el:'sndNoiseVal',fn:function(v){toneNoise=v;}},
-   {k:'toneReverb',v:15,sl:'sndReverbSlider',el:'sndReverbVal',fn:function(v){toneReverb=v;reverbNode=null;}}
-  ].forEach(function(o){
-    var val=p[o.k]!==undefined?p[o.k]:o.v;
-    o.fn(val);
-    var sl=document.getElementById(o.sl);if(sl)sl.value=val;
-    var el=document.getElementById(o.el);if(el)el.textContent=val+'%';
+  // Restore tone-shaping params and build knobs
+  var knobDefaults={toneVolume:80,toneBrightness:50,toneAttack:10,toneRelease:50,toneNoise:0,toneReverb:15,toneFilterEnv:50,toneNoiseTone:50};
+  Object.keys(knobDefaults).forEach(function(k){
+    var v=p[k]!==undefined?p[k]:knobDefaults[k];
+    updateSoundParam(k,v);
+  });
+  buildSoundKnobs();
+  // Set knob visuals to restored values
+  Object.keys(knobDefaults).forEach(function(k){
+    var v=p[k]!==undefined?p[k]:knobDefaults[k];
+    if(soundKnobRefs[k])soundKnobRefs[k].setValue(v);
   });
   // Restore layer oscillator selection
   if(p.toneLayer){toneLayer=p.toneLayer;document.getElementById('layerSelect').value=p.toneLayer;}
@@ -696,6 +796,22 @@ function randomiseConfig(){
   os.value=Math.max(2,Math.min(6,parseInt(os.value)+(Math.floor(Math.random()*3)-1)));
   savePref('root',rs.value);savePref('scale',ss.value);savePref('octave',os.value);
   render();updateConfigSummary();
+}
+function randomiseSound(){
+  var ranges={toneVolume:[40,100],toneBrightness:[10,90],toneAttack:[0,60],toneRelease:[15,85],toneNoise:[0,60],toneReverb:[0,70],toneFilterEnv:[15,85],toneNoiseTone:[10,90]};
+  Object.keys(ranges).forEach(function(k){
+    var r=ranges[k],v=r[0]+Math.floor(Math.random()*(r[1]-r[0]+1));
+    updateSoundParam(k,v);
+    if(soundKnobRefs[k])soundKnobRefs[k].setValue(v);
+  });
+  // Randomise dropdowns
+  var timbres=['piano','synth','soft'];
+  var layers=['none','octave','fifth','detune','sub'];
+  var ts=document.getElementById('timbreSelect'),ls=document.getElementById('layerSelect');
+  var newTimbre=timbres[Math.floor(Math.random()*timbres.length)];
+  var newLayer=layers[Math.floor(Math.random()*layers.length)];
+  ts.value=newTimbre;currentTimbre=newTimbre;savePref('timbre',newTimbre);
+  ls.value=newLayer;toneLayer=newLayer;savePref('toneLayer',newLayer);
 }
 function toggleConfigPanel(){
   var p=document.getElementById('configPanel'),c=document.getElementById('configChevron');
