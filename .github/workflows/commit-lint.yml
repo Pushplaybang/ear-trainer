@@ -35,7 +35,7 @@ jobs:
 
           FAILED=0
           AGENT_COMMITS=0
-          while IFS=$'\t' read -r SHA MSG AUTHOR EMAIL; do
+          while IFS=$'\t' read -r MSG AUTHOR EMAIL; do
             AUTHOR_INFO="${AUTHOR} <${EMAIL}>"
             if [ -n "$AGENT_AUTHOR_PATTERN" ] && echo "$AUTHOR_INFO" | grep -qiE "$AGENT_AUTHOR_PATTERN"; then
               echo "🤖 $MSG  (agent commit by $AUTHOR_INFO, skipped)"
@@ -54,7 +54,7 @@ jobs:
               echo "🚩 $MSG"
               FAILED=1
             fi
-          done < <(git log --format="%H%x09%s%x09%an%x09%ae" "$BASE_SHA".."$HEAD_SHA")
+          done < <(git log --format="%s%x09%an%x09%ae" "$BASE_SHA".."$HEAD_SHA")
 
           echo "agent_commit_count=$AGENT_COMMITS" >> "$GITHUB_OUTPUT"
 
@@ -84,9 +84,9 @@ jobs:
               '',
               'Please use **Squash and merge** for this PR to keep the commit history tidy.',
               '',
-              '**Copy/paste Conventional Commit title:**',
+              '**Copy/paste Conventional Commit title (scope optional):**',
               '```',
-              'feat(scope): short description of the change',
+              'feat: short description of the change',
               '```',
               '**Example (copy/paste):**',
               '```',
