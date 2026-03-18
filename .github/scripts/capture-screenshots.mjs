@@ -36,7 +36,6 @@ try {
     const target = path.join(outputDir, file);
 
     await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
-    await page.waitForTimeout(1000);
     await page.screenshot({ path: target, fullPage: true });
 
     manifest.pages.push({
