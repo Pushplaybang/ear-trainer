@@ -323,10 +323,13 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
     <div class="card-title">// Sound</div>
     <div class="controls cols2">
       <div class="control-group"><label>Timbre</label><select id="timbreSelect"><option value="piano">Synth 1</option><option value="synth">Synth 2</option><option value="soft">Synth 3</option></select></div>
+      <div class="control-group"><label>Layer</label><select id="layerSelect" onchange="updateSoundParam('toneLayer',this.value,'_none')"><option value="none">None</option><option value="octave">+Octave</option><option value="fifth">+Fifth</option><option value="detune">Detune (chorus)</option><option value="sub">Sub (−1 oct)</option></select></div>
       <div class="slider-group"><label>Volume <span class="slider-val" id="sndVolVal">80%</span></label><input type="range" id="sndVolSlider" min="0" max="100" value="80" oninput="updateSoundParam('toneVolume',this.value,'sndVolVal')"></div>
       <div class="slider-group"><label>Brightness <span class="slider-val" id="sndBrightVal">50%</span></label><input type="range" id="sndBrightSlider" min="0" max="100" value="50" oninput="updateSoundParam('toneBrightness',this.value,'sndBrightVal')"></div>
       <div class="slider-group"><label>Attack <span class="slider-val" id="sndAtkVal">10%</span></label><input type="range" id="sndAtkSlider" min="0" max="100" value="10" oninput="updateSoundParam('toneAttack',this.value,'sndAtkVal')"></div>
       <div class="slider-group"><label>Release <span class="slider-val" id="sndRelVal">50%</span></label><input type="range" id="sndRelSlider" min="0" max="100" value="50" oninput="updateSoundParam('toneRelease',this.value,'sndRelVal')"></div>
+      <div class="slider-group"><label>Noise <span class="slider-val" id="sndNoiseVal">0%</span></label><input type="range" id="sndNoiseSlider" min="0" max="100" value="0" oninput="updateSoundParam('toneNoise',this.value,'sndNoiseVal')"></div>
+      <div class="slider-group"><label>Reverb <span class="slider-val" id="sndReverbVal">15%</span></label><input type="range" id="sndReverbSlider" min="0" max="100" value="15" oninput="updateSoundParam('toneReverb',this.value,'sndReverbVal')"></div>
     </div>
   </div>
 </div>
@@ -418,28 +421,53 @@ function updateTuningVisibility(){
 
 // ══ AUDIO ══
 let audioCtx=null,currentTimbre='piano';
-let toneVolume=80,toneBrightness=50,toneAttack=10,toneRelease=50;
+let toneVolume=80,toneBrightness=50,toneAttack=10,toneRelease=50,toneNoise=0,toneReverb=15,toneLayer='none';
+let reverbNode=null;
 function getVolume(){return toneVolume/100;}
 function getBrightness(){return 200+(toneBrightness/100)*7800;}
 function getAttackTime(){return 0.005+(toneAttack/100)*0.295;}
 function getReleaseTime(){return 0.2+(toneRelease/100)*2.8;}
 function updateSoundParam(key,val,elId){
+  if(key==='toneLayer'){toneLayer=val;savePref(key,val);return;}
   val=+val;
   if(key==='toneVolume')toneVolume=val;
   else if(key==='toneBrightness')toneBrightness=val;
   else if(key==='toneAttack')toneAttack=val;
   else if(key==='toneRelease')toneRelease=val;
-  document.getElementById(elId).textContent=val+'%';
+  else if(key==='toneNoise')toneNoise=val;
+  else if(key==='toneReverb'){toneReverb=val;reverbNode=null;}
+  if(elId!=='_none'){var el=document.getElementById(elId);if(el)el.textContent=val+'%';}
   savePref(key,val);
+}
+function getReverbNode(){
+  if(reverbNode)return reverbNode;
+  var ctx=getCtx(),len=ctx.sampleRate*1.5,buf=ctx.createBuffer(2,len,ctx.sampleRate);
+  for(var ch=0;ch<2;ch++){var d=buf.getChannelData(ch);for(var i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(ctx.sampleRate*0.4));}
+  reverbNode=ctx.createConvolver();reverbNode.buffer=buf;return reverbNode;
 }
 function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx;}
 function playTone(f,t0,dur=0.75){_playToneImpl(f,t0,dur,getCtx().destination);}
 function _playToneImpl(f,t0,dur,dest){
   const ctx=getCtx(),vol=getVolume(),atk=getAttackTime(),rel=getReleaseTime(),bright=getBrightness();
+  const totalDur=dur+rel;
+  // Master chain: mg → lp → dry/wet split
   const mg=ctx.createGain();mg.gain.value=vol;
   const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=bright;
-  mg.connect(lp);lp.connect(dest);
-  const totalDur=dur+rel;
+  mg.connect(lp);
+  // Reverb send (wet/dry)
+  const rvbAmt=toneReverb/100;
+  if(rvbAmt>0){
+    const dry=ctx.createGain(),wet=ctx.createGain();
+    dry.gain.value=1-rvbAmt*0.5;wet.gain.value=rvbAmt;
+    lp.connect(dry);dry.connect(dest);
+    const rv=getReverbNode();
+    // ConvolverNode can only have one output dest, so create fresh each time
+    const cv=ctx.createConvolver();cv.buffer=rv.buffer;
+    lp.connect(cv);cv.connect(wet);wet.connect(dest);
+  } else {
+    lp.connect(dest);
+  }
+  // ── Core timbre ──
   if(currentTimbre==='piano'){
     const bufLen=Math.ceil(ctx.sampleRate*0.01),buf=ctx.createBuffer(1,bufLen,ctx.sampleRate);
     const d=buf.getChannelData(0);for(let i=0;i<bufLen;i++)d[i]=(Math.random()*2-1);
@@ -476,6 +504,34 @@ function _playToneImpl(f,t0,dur,dest){
     g2.gain.setValueAtTime(0,t0);g2.gain.linearRampToValueAtTime(0.1,t0+atk);g2.gain.exponentialRampToValueAtTime(0.001,t0+totalDur*.6);
     o2.connect(g2);g2.connect(mg);o2.start(t0);o2.stop(t0+totalDur);
     osc.connect(filt);filt.connect(g);g.connect(mg);osc.start(t0);osc.stop(t0+totalDur);
+  }
+  // ── Noise layer ──
+  if(toneNoise>0){
+    const nAmt=toneNoise/100*0.15;
+    const nBufLen=Math.ceil(ctx.sampleRate*totalDur),nBuf=ctx.createBuffer(1,nBufLen,ctx.sampleRate);
+    const nd=nBuf.getChannelData(0);for(let i=0;i<nBufLen;i++)nd[i]=(Math.random()*2-1);
+    const nSrc=ctx.createBufferSource();nSrc.buffer=nBuf;
+    const nFilt=ctx.createBiquadFilter();nFilt.type='bandpass';nFilt.frequency.value=f;nFilt.Q.value=1;
+    const nGain=ctx.createGain();
+    nGain.gain.setValueAtTime(0,t0);nGain.gain.linearRampToValueAtTime(nAmt,t0+atk);
+    nGain.gain.exponentialRampToValueAtTime(0.001,t0+totalDur);
+    nSrc.connect(nFilt);nFilt.connect(nGain);nGain.connect(mg);nSrc.start(t0);nSrc.stop(t0+totalDur+0.05);
+  }
+  // ── Layer oscillator (second voice) ──
+  if(toneLayer!=='none'){
+    let lf=f;
+    if(toneLayer==='octave')lf=f*2;
+    else if(toneLayer==='fifth')lf=f*1.5;
+    else if(toneLayer==='sub')lf=f/2;
+    else if(toneLayer==='detune')lf=f;
+    const lo=ctx.createOscillator(),lg=ctx.createGain();
+    lo.type=toneLayer==='sub'?'sine':'triangle';
+    lo.frequency.setValueAtTime(lf,t0);
+    if(toneLayer==='detune')lo.detune.setValueAtTime(12,t0); // ~12 cents for chorus
+    const layerVol=toneLayer==='sub'?0.12:0.1;
+    lg.gain.setValueAtTime(0,t0);lg.gain.linearRampToValueAtTime(layerVol,t0+atk);
+    lg.gain.exponentialRampToValueAtTime(0.001,t0+totalDur);
+    lo.connect(lg);lg.connect(mg);lo.start(t0);lo.stop(t0+totalDur+0.05);
   }
 }
 function playToneToNode(f,t0,dur,dest){_playToneImpl(f,t0,dur,dest);}
@@ -604,13 +660,17 @@ function restoreSettings(){
   [{k:'toneVolume',v:80,sl:'sndVolSlider',el:'sndVolVal',fn:function(v){toneVolume=v;}},
    {k:'toneBrightness',v:50,sl:'sndBrightSlider',el:'sndBrightVal',fn:function(v){toneBrightness=v;}},
    {k:'toneAttack',v:10,sl:'sndAtkSlider',el:'sndAtkVal',fn:function(v){toneAttack=v;}},
-   {k:'toneRelease',v:50,sl:'sndRelSlider',el:'sndRelVal',fn:function(v){toneRelease=v;}}
+   {k:'toneRelease',v:50,sl:'sndRelSlider',el:'sndRelVal',fn:function(v){toneRelease=v;}},
+   {k:'toneNoise',v:0,sl:'sndNoiseSlider',el:'sndNoiseVal',fn:function(v){toneNoise=v;}},
+   {k:'toneReverb',v:15,sl:'sndReverbSlider',el:'sndReverbVal',fn:function(v){toneReverb=v;reverbNode=null;}}
   ].forEach(function(o){
     var val=p[o.k]!==undefined?p[o.k]:o.v;
     o.fn(val);
     var sl=document.getElementById(o.sl);if(sl)sl.value=val;
     var el=document.getElementById(o.el);if(el)el.textContent=val+'%';
   });
+  // Restore layer oscillator selection
+  if(p.toneLayer){toneLayer=p.toneLayer;document.getElementById('layerSelect').value=p.toneLayer;}
   updateTuningVisibility();
   applyMode(p.mode||'light',true);
   updateConfigSummary();
