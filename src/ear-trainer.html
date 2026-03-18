@@ -125,29 +125,8 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
 .bar-title{font-family:var(--font-h);font-size:.9rem;color:var(--accent);letter-spacing:.04em;white-space:nowrap;}
 
 /* ── CARD HOVER SHADOW ── */
-.app-layout>.card:hover{box-shadow:0 12px 40px rgba(0,0,0,.12),0 0 0 1px var(--border);}
-[data-mode="dark"] .app-layout>.card:hover{box-shadow:0 12px 40px rgba(0,0,0,.4),0 0 0 1px var(--border);}
-
-/* ── APP LAYOUT: 3-col on desktop, stacked on mobile ── */
-.app-layout{display:grid;gap:16px;grid-template-columns:1fr;width:100%;}
-.app-layout>.card{margin-bottom:0;} /* grid gap replaces margin */
-@media(min-width:900px){
-  .content{max-width:none;}
-  .app-layout{
-    grid-template-columns:220px 1fr 220px;
-    grid-template-rows:auto 1fr;
-    grid-template-areas:"config vis sound" "config quiz sound";
-    align-items:stretch;
-  }
-  .card-config{grid-area:config;position:sticky;top:52px;align-self:start;}
-  .card-vis{grid-area:vis;}
-  .card-quiz{grid-area:quiz;}
-  .card-sound{grid-area:sound;position:sticky;top:52px;align-self:start;}
-  /* Force single-col config in sidebar */
-  .card-config .controls.config-grid{grid-template-columns:1fr !important;}
-  /* Sound dropdowns stack in sidebar */
-  .card-sound .controls.cols2{grid-template-columns:1fr;}
-}
+.card:hover{box-shadow:0 12px 40px rgba(0,0,0,.12),0 0 0 1px var(--border);}
+[data-mode="dark"] .card:hover{box-shadow:0 12px 40px rgba(0,0,0,.4),0 0 0 1px var(--border);}
 
 /* ── KNOBS ── */
 .knob-row{display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:center;padding:8px 0;}
@@ -276,10 +255,9 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
 </div>
 
 <div class="content">
-  <div class="app-layout">
 
   <!-- Config -->
-  <div class="card card-config">
+  <div class="card">
     <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;"><span>// Configuration</span><button class="btn-icon-sm" onclick="randomiseConfig()" title="Randomise">⚄</button></div>
     <div class="config-summary" id="configSummary" onclick="toggleConfigPanel()">
       <span id="configSummaryText">C Major · Oct 4 · 1 Oct</span>
@@ -297,7 +275,7 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
   </div>
 
   <!-- Visualiser -->
-  <div class="card card-vis">
+  <div class="card">
     <div class="card-title">Visualiser</div>
     <div class="vis-tabs">
       <button class="vis-tab active" data-vis="piano">🎹 Piano</button>
@@ -318,7 +296,7 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
   </div>
 
   <!-- Quiz -->
-  <div class="card card-quiz">
+  <div class="card">
     <div class="card-title">Ear Training Quiz</div>
     <div class="quiz-area">
       <div class="quiz-mode-row">
@@ -371,7 +349,7 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
   </div>
 
   <!-- Sound -->
-  <div class="card card-sound">
+  <div class="card">
     <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;"><span>// Sound</span><button class="btn-icon-sm" onclick="randomiseSound()" title="Randomise sound">⚄</button></div>
     <div class="controls cols2">
       <div class="control-group"><label>Timbre</label><select id="timbreSelect"><option value="piano">Synth 1</option><option value="synth">Synth 2</option><option value="soft">Synth 3</option></select></div>
@@ -380,7 +358,6 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
     <div class="knob-row" id="soundKnobRow"></div>
   </div>
 
-  </div><!-- /.app-layout -->
 </div>
 <div class="app-footer">made with ♥ by Paul van Zyl</div>
 
