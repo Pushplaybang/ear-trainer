@@ -17,6 +17,7 @@ const pages = [
 ];
 
 const viewport = { width: 1440, height: 900 };
+const timeoutMs = 30000;
 
 await fs.mkdir(outputDir, { recursive: true });
 
@@ -35,7 +36,7 @@ try {
     const file = `${entry.name}.png`;
     const target = path.join(outputDir, file);
 
-    await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+    await page.goto(url, { waitUntil: 'load', timeout: timeoutMs });
     await page.screenshot({ path: target, fullPage: true });
 
     manifest.pages.push({
