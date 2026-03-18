@@ -37,7 +37,7 @@ try {
     const file = `${entry.name}.png`;
     const target = path.join(outputDir, file);
 
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: pageLoadTimeoutMs });
+    await page.goto(url, { waitUntil: 'load', timeout: pageLoadTimeoutMs });
     await page.waitForFunction(
       (selectors) => selectors.some((selector) => document.querySelector(selector)),
       readySelectors,
