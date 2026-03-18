@@ -17,7 +17,7 @@ const pages = [
 ];
 
 const viewport = { width: 1440, height: 900 };
-const timeoutMs = 30000;
+const pageLoadTimeoutMs = 30000;
 const readySelectors = ['.card', '.app-footer'];
 
 await fs.mkdir(outputDir, { recursive: true });
@@ -37,11 +37,11 @@ try {
     const file = `${entry.name}.png`;
     const target = path.join(outputDir, file);
 
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: pageLoadTimeoutMs });
     await page.waitForFunction(
       (selectors) => selectors.some((selector) => document.querySelector(selector)),
       readySelectors,
-      { timeout: timeoutMs }
+      { timeout: pageLoadTimeoutMs }
     );
     await page.screenshot({ path: target, fullPage: true });
 
