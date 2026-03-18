@@ -79,6 +79,14 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
 /* ── EXTRA BUTTON VARIANT ── */
 .btn-rand{background:transparent;color:var(--accent2);border:1px solid var(--accent2);}
 .btn-rand:hover{background:rgba(100,200,200,.08);}
+.scale-actions{display:flex;gap:6px;margin-top:10px;justify-content:center;}
+.scale-actions button{padding:5px 12px;font-size:.65rem;}
+#btnSpeed{min-width:36px;text-align:center;}
+.btn-icon-sm{width:28px;height:28px;border-radius:var(--r-sm,10px);border:1px solid var(--border);background:transparent;color:var(--accent2);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .18s;padding:0;line-height:1;}
+.btn-icon-sm:hover{border-color:var(--accent2);background:rgba(192,0,110,0.08);}
+.config-summary{display:none;}
+.config-chevron{font-size:.7rem;color:var(--muted);transition:transform var(--transition,.22s);}
+.config-chevron.open{transform:rotate(180deg);}
 @keyframes wobble{0%,100%{transform:rotate(0)}15%{transform:rotate(-3deg)}30%{transform:rotate(2.5deg)}45%{transform:rotate(-2deg)}60%{transform:rotate(1.5deg)}75%{transform:rotate(-1deg)}}
 .wobble{animation:wobble 0.6s ease-in-out;}
 
@@ -97,9 +105,11 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
 .timer-dur-btn:hover{border-color:var(--accent);color:var(--accent);}
 .timer-dur-btn.active{background:var(--accent);color:var(--pill-text);border-color:var(--accent);font-weight:700;}
 @media(max-width:600px){
-  .quiz-mode-btn{min-height:44px;}
   .quiz-opt{min-height:44px;}
-  .timer-dur-btn{min-height:44px;padding:5px 11px;}
+  .vis-tab{min-height:unset;}
+  .config-summary{display:flex;align-items:center;justify-content:space-between;padding:8px 0;cursor:pointer;font-family:var(--font-b);font-size:.78rem;color:var(--text-2);letter-spacing:.04em;}
+  .config-panel{max-height:0;overflow:hidden;transition:max-height .35s cubic-bezier(0.4,0,0.2,1);}
+  .config-panel.open{max-height:500px;}
 }
 
 /* ── SESSION ── */
@@ -223,17 +233,19 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
 
   <!-- Config -->
   <div class="card">
-    <div class="card-title">// Configuration</div>
-    <div class="controls cols4">
-      <div class="control-group"><label>Root Note</label><select id="rootSelect"></select></div>
-      <div class="control-group"><label>Scale / Mode</label><select id="scaleSelect"></select></div>
-      <div class="control-group"><label>Octave</label><select id="octaveSelect"></select></div>
-      <div class="control-group"><label>Range</label><select id="rangeSelect"></select></div>
-      <div class="control-group" id="tuningGroup" style="display:none"><label id="tuningLabel">Tuning</label><select id="tuningSelect"></select></div>
-      <div class="control-group"><label>Sound</label><select id="timbreSelect"><option value="piano">Synth 1</option><option value="synth">Synth 2</option><option value="soft">Synth 3</option></select></div>
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;"><span>// Configuration</span><button class="btn-icon-sm" onclick="randomiseConfig()" title="Randomise">⚄</button></div>
+    <div class="config-summary" id="configSummary" onclick="toggleConfigPanel()">
+      <span id="configSummaryText">C Major · Oct 4 · 1 Oct</span>
+      <span class="config-chevron" id="configChevron">▾</span>
     </div>
-    <div class="actions">
-      <button class="btn-rand" onclick="randomiseConfig()">⚄ Randomise</button>
+    <div class="config-panel" id="configPanel">
+      <div class="controls cols3">
+        <div class="control-group"><label>Root Note</label><select id="rootSelect"></select></div>
+        <div class="control-group"><label>Scale / Mode</label><select id="scaleSelect"></select></div>
+        <div class="control-group"><label>Octave</label><select id="octaveSelect"></select></div>
+        <div class="control-group"><label>Range</label><select id="rangeSelect"></select></div>
+        <div class="control-group" id="tuningGroup" style="display:none"><label id="tuningLabel">Tuning</label><select id="tuningSelect"></select></div>
+      </div>
     </div>
   </div>
 
@@ -251,9 +263,10 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
     <div class="vis-panel" id="vis-bass"><div class="fret-wrap"><svg class="bass" id="bassSvg" viewBox="0 0 700 170" xmlns="http://www.w3.org/2000/svg"></svg></div></div>
     <div class="vis-panel" id="vis-ukulele"><div class="fret-wrap"><svg class="ukulele" id="ukeSvg" viewBox="0 0 560 155" xmlns="http://www.w3.org/2000/svg"></svg></div></div>
     <div class="status"><div class="status-bar" id="statusBar"></div></div>
-    <div class="actions">
-      <button class="btn-primary" id="btnScaleAsc" onclick="playScaleAsc()">▶ Play Ascending</button>
-      <button class="btn-secondary" id="btnScaleDesc" onclick="playScaleDesc()">▼ Play Descending</button>
+    <div class="scale-actions">
+      <button class="btn-ghost" id="btnScaleAsc" onclick="playScaleAsc()">▶ Ascending</button>
+      <button class="btn-ghost" id="btnScaleDesc" onclick="playScaleDesc()">▼ Descending</button>
+      <button class="btn-ghost" id="btnSpeed" onclick="toggleSpeed()">1×</button>
     </div>
   </div>
 
@@ -293,15 +306,27 @@ svg.ukulele{display:block;min-width:480px;width:100%;}
       <div class="quiz-options" id="quizOptions"></div>
       <div class="quiz-feedback" id="quizFeedback"></div>
       <div class="toggles-row">
-        <label class="toggle-label"><input type="checkbox" id="rootFirstToggle"><div class="toggle-track"><div class="toggle-thumb"></div></div>Play reference first</label>
+        <label class="toggle-label"><input type="checkbox" id="rootFirstToggle" checked><div class="toggle-track"><div class="toggle-thumb"></div></div>Play reference first</label>
         <div class="timer-dur-row"><span class="timer-dur-label">Timer</span><div class="timer-dur-btns" id="timerDurBtns"><button class="timer-dur-btn active" data-dur="0">Off</button><button class="timer-dur-btn" data-dur="5">5s</button><button class="timer-dur-btn" data-dur="10">10s</button><button class="timer-dur-btn" data-dur="15">15s</button><button class="timer-dur-btn" data-dur="20">20s</button></div></div>
       </div>
       <hr class="divider">
       <div class="actions" style="justify-content:center">
-        <button class="btn-accent2" onclick="startQuiz()">▶ Start Quiz</button>
-        <button class="btn-secondary" onclick="replayQuizNote()">↺ Replay</button>
+        <button class="btn-accent2" id="btnStartQuiz" onclick="startQuiz()">▶ Start Quiz</button>
+        <button class="btn-secondary" id="btnReplay" onclick="replayQuizNote()" style="display:none">↺ Replay</button>
         <button class="btn-danger" id="btnReset" onclick="resetScore()">✕ Reset</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Sound -->
+  <div class="card">
+    <div class="card-title">// Sound</div>
+    <div class="controls cols2">
+      <div class="control-group"><label>Timbre</label><select id="timbreSelect"><option value="piano">Synth 1</option><option value="synth">Synth 2</option><option value="soft">Synth 3</option></select></div>
+      <div class="slider-group"><label>Volume <span class="slider-val" id="sndVolVal">80%</span></label><input type="range" id="sndVolSlider" min="0" max="100" value="80" oninput="updateSoundParam('toneVolume',this.value,'sndVolVal')"></div>
+      <div class="slider-group"><label>Brightness <span class="slider-val" id="sndBrightVal">50%</span></label><input type="range" id="sndBrightSlider" min="0" max="100" value="50" oninput="updateSoundParam('toneBrightness',this.value,'sndBrightVal')"></div>
+      <div class="slider-group"><label>Attack <span class="slider-val" id="sndAtkVal">10%</span></label><input type="range" id="sndAtkSlider" min="0" max="100" value="10" oninput="updateSoundParam('toneAttack',this.value,'sndAtkVal')"></div>
+      <div class="slider-group"><label>Release <span class="slider-val" id="sndRelVal">50%</span></label><input type="range" id="sndRelSlider" min="0" max="100" value="50" oninput="updateSoundParam('toneRelease',this.value,'sndRelVal')"></div>
     </div>
   </div>
 </div>
@@ -393,89 +418,67 @@ function updateTuningVisibility(){
 
 // ══ AUDIO ══
 let audioCtx=null,currentTimbre='piano';
+let toneVolume=80,toneBrightness=50,toneAttack=10,toneRelease=50;
+function getVolume(){return toneVolume/100;}
+function getBrightness(){return 200+(toneBrightness/100)*7800;}
+function getAttackTime(){return 0.005+(toneAttack/100)*0.295;}
+function getReleaseTime(){return 0.2+(toneRelease/100)*2.8;}
+function updateSoundParam(key,val,elId){
+  val=+val;
+  if(key==='toneVolume')toneVolume=val;
+  else if(key==='toneBrightness')toneBrightness=val;
+  else if(key==='toneAttack')toneAttack=val;
+  else if(key==='toneRelease')toneRelease=val;
+  document.getElementById(elId).textContent=val+'%';
+  savePref(key,val);
+}
 function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx;}
-function playTone(f,t0,dur=0.75){
-  const ctx=getCtx();
+function playTone(f,t0,dur=0.75){_playToneImpl(f,t0,dur,getCtx().destination);}
+function _playToneImpl(f,t0,dur,dest){
+  const ctx=getCtx(),vol=getVolume(),atk=getAttackTime(),rel=getReleaseTime(),bright=getBrightness();
+  const mg=ctx.createGain();mg.gain.value=vol;
+  const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=bright;
+  mg.connect(lp);lp.connect(dest);
+  const totalDur=dur+rel;
   if(currentTimbre==='piano'){
     const bufLen=Math.ceil(ctx.sampleRate*0.01),buf=ctx.createBuffer(1,bufLen,ctx.sampleRate);
     const d=buf.getChannelData(0);for(let i=0;i<bufLen;i++)d[i]=(Math.random()*2-1);
     const ns=ctx.createBufferSource();ns.buffer=buf;
     const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f;bp.Q.value=2;
     const ng=ctx.createGain();
-    ng.gain.setValueAtTime(0,t0);ng.gain.linearRampToValueAtTime(0.5,t0+0.01);
-    ng.gain.exponentialRampToValueAtTime(0.15,t0+0.1);ng.gain.exponentialRampToValueAtTime(0.001,t0+0.5);
-    ns.connect(bp);bp.connect(ng);ng.connect(ctx.destination);ns.start(t0);
+    ng.gain.setValueAtTime(0,t0);ng.gain.linearRampToValueAtTime(0.5,t0+atk);
+    ng.gain.exponentialRampToValueAtTime(0.15,t0+0.1);ng.gain.exponentialRampToValueAtTime(0.001,t0+Math.min(totalDur,0.5));
+    ns.connect(bp);bp.connect(ng);ng.connect(mg);ns.start(t0);
     const osc=ctx.createOscillator(),g=ctx.createGain();
     osc.type='sine';osc.frequency.setValueAtTime(f,t0);
-    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.28,t0+0.01);
-    g.gain.exponentialRampToValueAtTime(0.09,t0+0.1);g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
-    osc.connect(g);g.connect(ctx.destination);osc.start(t0);osc.stop(t0+dur);
+    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.28,t0+atk);
+    g.gain.exponentialRampToValueAtTime(0.09,t0+atk+0.05);g.gain.exponentialRampToValueAtTime(0.001,t0+totalDur);
+    osc.connect(g);g.connect(mg);osc.start(t0);osc.stop(t0+totalDur+0.05);
   } else if(currentTimbre==='soft'){
-    const sustain=Math.max(dur,1.5),lp=ctx.createBiquadFilter();
-    lp.type='lowpass';lp.frequency.value=1200;lp.connect(ctx.destination);
+    const sustain=Math.max(totalDur,1.5);
     const osc=ctx.createOscillator(),g=ctx.createGain();
     osc.type='sine';osc.frequency.setValueAtTime(f,t0);
-    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.32,t0+0.04);
+    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.32,t0+atk);
     g.gain.setValueAtTime(0.32,t0+sustain*0.7);g.gain.exponentialRampToValueAtTime(0.001,t0+sustain);
-    osc.connect(g);g.connect(lp);osc.start(t0);osc.stop(t0+sustain+0.05);
+    osc.connect(g);g.connect(mg);osc.start(t0);osc.stop(t0+sustain+0.05);
     const sub=ctx.createOscillator(),sg=ctx.createGain();
     sub.type='sine';sub.frequency.setValueAtTime(f/2,t0);
-    sg.gain.setValueAtTime(0,t0);sg.gain.linearRampToValueAtTime(0.08,t0+0.04);
+    sg.gain.setValueAtTime(0,t0);sg.gain.linearRampToValueAtTime(0.08,t0+atk);
     sg.gain.setValueAtTime(0.08,t0+sustain*0.7);sg.gain.exponentialRampToValueAtTime(0.001,t0+sustain);
-    sub.connect(sg);sg.connect(lp);sub.start(t0);sub.stop(t0+sustain+0.05);
+    sub.connect(sg);sg.connect(mg);sub.start(t0);sub.stop(t0+sustain+0.05);
   } else {
     const osc=ctx.createOscillator(),g=ctx.createGain(),filt=ctx.createBiquadFilter();
     filt.type='lowpass';filt.frequency.value=2800;osc.type='triangle';osc.frequency.setValueAtTime(f,t0);
-    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.38,t0+0.015);
-    g.gain.exponentialRampToValueAtTime(0.18,t0+dur*.4);g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.38,t0+atk);
+    g.gain.exponentialRampToValueAtTime(0.18,t0+totalDur*.4);g.gain.exponentialRampToValueAtTime(0.001,t0+totalDur);
     const o2=ctx.createOscillator(),g2=ctx.createGain();
     o2.type='sine';o2.frequency.setValueAtTime(f*2,t0);
-    g2.gain.setValueAtTime(0,t0);g2.gain.linearRampToValueAtTime(0.1,t0+0.01);g2.gain.exponentialRampToValueAtTime(0.001,t0+dur*.6);
-    o2.connect(g2);g2.connect(ctx.destination);o2.start(t0);o2.stop(t0+dur);
-    osc.connect(filt);filt.connect(g);g.connect(ctx.destination);osc.start(t0);osc.stop(t0+dur);
+    g2.gain.setValueAtTime(0,t0);g2.gain.linearRampToValueAtTime(0.1,t0+atk);g2.gain.exponentialRampToValueAtTime(0.001,t0+totalDur*.6);
+    o2.connect(g2);g2.connect(mg);o2.start(t0);o2.stop(t0+totalDur);
+    osc.connect(filt);filt.connect(g);g.connect(mg);osc.start(t0);osc.stop(t0+totalDur);
   }
 }
-function playToneToNode(f,t0,dur,dest){
-  const ctx=getCtx();
-  if(currentTimbre==='piano'){
-    const bufLen=Math.ceil(ctx.sampleRate*0.01),buf=ctx.createBuffer(1,bufLen,ctx.sampleRate);
-    const d=buf.getChannelData(0);for(let i=0;i<bufLen;i++)d[i]=(Math.random()*2-1);
-    const ns=ctx.createBufferSource();ns.buffer=buf;
-    const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f;bp.Q.value=2;
-    const ng=ctx.createGain();
-    ng.gain.setValueAtTime(0,t0);ng.gain.linearRampToValueAtTime(0.5,t0+0.01);
-    ng.gain.exponentialRampToValueAtTime(0.15,t0+0.1);ng.gain.exponentialRampToValueAtTime(0.001,t0+0.5);
-    ns.connect(bp);bp.connect(ng);ng.connect(dest);ns.start(t0);
-    const osc=ctx.createOscillator(),g=ctx.createGain();
-    osc.type='sine';osc.frequency.setValueAtTime(f,t0);
-    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.28,t0+0.01);
-    g.gain.exponentialRampToValueAtTime(0.09,t0+0.1);g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
-    osc.connect(g);g.connect(dest);osc.start(t0);osc.stop(t0+dur);
-  } else if(currentTimbre==='soft'){
-    const sustain=Math.max(dur,1.5),lp=ctx.createBiquadFilter();
-    lp.type='lowpass';lp.frequency.value=1200;lp.connect(dest);
-    const osc=ctx.createOscillator(),g=ctx.createGain();
-    osc.type='sine';osc.frequency.setValueAtTime(f,t0);
-    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.32,t0+0.04);
-    g.gain.setValueAtTime(0.32,t0+sustain*0.7);g.gain.exponentialRampToValueAtTime(0.001,t0+sustain);
-    osc.connect(g);g.connect(lp);osc.start(t0);osc.stop(t0+sustain+0.05);
-    const sub=ctx.createOscillator(),sg=ctx.createGain();
-    sub.type='sine';sub.frequency.setValueAtTime(f/2,t0);
-    sg.gain.setValueAtTime(0,t0);sg.gain.linearRampToValueAtTime(0.08,t0+0.04);
-    sg.gain.setValueAtTime(0.08,t0+sustain*0.7);sg.gain.exponentialRampToValueAtTime(0.001,t0+sustain);
-    sub.connect(sg);sg.connect(lp);sub.start(t0);sub.stop(t0+sustain+0.05);
-  } else {
-    const osc=ctx.createOscillator(),g=ctx.createGain(),filt=ctx.createBiquadFilter();
-    filt.type='lowpass';filt.frequency.value=2800;osc.type='triangle';osc.frequency.setValueAtTime(f,t0);
-    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.38,t0+0.015);
-    g.gain.exponentialRampToValueAtTime(0.18,t0+dur*.4);g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
-    const o2=ctx.createOscillator(),g2=ctx.createGain();
-    o2.type='sine';o2.frequency.setValueAtTime(f*2,t0);
-    g2.gain.setValueAtTime(0,t0);g2.gain.linearRampToValueAtTime(0.1,t0+0.01);g2.gain.exponentialRampToValueAtTime(0.001,t0+dur*.6);
-    o2.connect(g2);g2.connect(dest);o2.start(t0);o2.stop(t0+dur);
-    osc.connect(filt);filt.connect(g);g.connect(dest);osc.start(t0);osc.stop(t0+dur);
-  }
-}
+function playToneToNode(f,t0,dur,dest){_playToneImpl(f,t0,dur,dest);}
 function playChordFreqs(freqs){const t0=getCtx().currentTime;freqs.forEach(f=>playTone(f,t0,1.6));}
 
 // ══ MUSIC DATA ══
@@ -561,10 +564,10 @@ function buildSelects(){
   const rangeEl=document.getElementById('rangeSelect');
   ['1 Octave','2 Octaves','3 Octaves'].forEach((t,i)=>{const o=document.createElement('option');o.value=i+1;o.textContent=t;rangeEl.appendChild(o);});
   rangeEl.value=1;
-  rs.addEventListener('change',()=>{render();savePref('root',rs.value);});
-  ss.addEventListener('change',()=>{render();savePref('scale',ss.value);});
-  os.addEventListener('change',()=>{render();savePref('octave',os.value);});
-  rangeEl.addEventListener('change',()=>{render();savePref('range',parseInt(rangeEl.value));});
+  rs.addEventListener('change',()=>{render();savePref('root',rs.value);updateConfigSummary();});
+  ss.addEventListener('change',()=>{render();savePref('scale',ss.value);updateConfigSummary();});
+  os.addEventListener('change',()=>{render();savePref('octave',os.value);updateConfigSummary();});
+  rangeEl.addEventListener('change',()=>{render();savePref('range',parseInt(rangeEl.value));updateConfigSummary();});
 }
 
 // ══ QUIZ MODE ══
@@ -584,7 +587,8 @@ function restoreSettings(){
   if(p.scale) document.getElementById('scaleSelect').value=p.scale;
   if(p.octave) document.getElementById('octaveSelect').value=p.octave;
   if(p.range) document.getElementById('rangeSelect').value=p.range;
-  if(p.rootFirst) document.getElementById('rootFirstToggle').checked=true;
+  if(p.rootFirst===false) document.getElementById('rootFirstToggle').checked=false;
+  if(p.scaleFast){scaleFast=true;var sb=document.getElementById('btnSpeed');if(sb)sb.textContent='2×';}
   if(p.timbre){currentTimbre=p.timbre;document.getElementById('timbreSelect').value=p.timbre;}
   {const dur=p.timerDuration!==undefined?p.timerDuration:0;currentTimerDuration=dur;document.querySelectorAll('.timer-dur-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.dur)===dur));document.getElementById('timerWrap').classList.toggle('active',dur>0);if(dur>0)updateTimerRing(dur);}
   if(p.vis){
@@ -596,8 +600,20 @@ function restoreSettings(){
     currentQuizMode=p.quizMode;
     document.querySelectorAll('.quiz-mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===p.quizMode));
   }
+  // Restore tone-shaping params
+  [{k:'toneVolume',v:80,sl:'sndVolSlider',el:'sndVolVal',fn:function(v){toneVolume=v;}},
+   {k:'toneBrightness',v:50,sl:'sndBrightSlider',el:'sndBrightVal',fn:function(v){toneBrightness=v;}},
+   {k:'toneAttack',v:10,sl:'sndAtkSlider',el:'sndAtkVal',fn:function(v){toneAttack=v;}},
+   {k:'toneRelease',v:50,sl:'sndRelSlider',el:'sndRelVal',fn:function(v){toneRelease=v;}}
+  ].forEach(function(o){
+    var val=p[o.k]!==undefined?p[o.k]:o.v;
+    o.fn(val);
+    var sl=document.getElementById(o.sl);if(sl)sl.value=val;
+    var el=document.getElementById(o.el);if(el)el.textContent=val+'%';
+  });
   updateTuningVisibility();
   applyMode(p.mode||'light',true);
+  updateConfigSummary();
 }
 
 // ══ RANDOMISE ══
@@ -607,10 +623,21 @@ function randomiseConfig(){
   ss.value=Object.keys(SCALES)[Math.floor(Math.random()*Object.keys(SCALES).length)];
   os.value=Math.max(2,Math.min(6,parseInt(os.value)+(Math.floor(Math.random()*3)-1)));
   savePref('root',rs.value);savePref('scale',ss.value);savePref('octave',os.value);
-  render();
+  render();updateConfigSummary();
+}
+function toggleConfigPanel(){
+  var p=document.getElementById('configPanel'),c=document.getElementById('configChevron');
+  if(p)p.classList.toggle('open');if(c)c.classList.toggle('open');
+}
+function updateConfigSummary(){
+  var r=document.getElementById('rootSelect'),s=document.getElementById('scaleSelect'),o=document.getElementById('octaveSelect'),rng=document.getElementById('rangeSelect');
+  var el=document.getElementById('configSummaryText');
+  if(!el||!r||!s||!o||!rng) return;
+  el.textContent=r.value+' '+s.value+' · Oct '+o.value+' · '+rng.options[rng.selectedIndex].textContent;
 }
 
 // ══ QUIZ STATE ══
+let quizActive=false;
 let qCorrect=0,qTotal=0,qWrong=0,qTimeouts=0,qVisWrong=0;
 let qAns=null,qAnsOct=null,qFreq=null,qRefFreq=null,qAnswered=false;
 let qRecentNotes=[],qLastIntervalAns=null,qLastChordRoot=null,qMissWeights={};
@@ -744,6 +771,7 @@ function doReset(){
   var pFill=document.getElementById('quizProgressFill');var pVal=document.getElementById('quizProgressVal');
   if(pFill) pFill.style.width='0%';if(pVal) pVal.textContent='0%';
   var rb=document.getElementById('btnReset');if(rb){rb.textContent='✕ Reset';rb.className='btn-danger';}
+  quizActive=false;updateQuizButtons();
   updateTimerRing(currentTimerDuration);render();
 }
 function resetScore(){showOverlay();}
@@ -876,7 +904,7 @@ function highlightChord(chordNotes,result){
 }
 
 // ══ SCALE PLAYBACK (cancellable, with stop button) ══
-let scalePlayToken=0,scaleIsPlaying=false,scaleDirection=null,scaleSeqGain=null;
+let scalePlayToken=0,scaleIsPlaying=false,scaleDirection=null,scaleSeqGain=null,scaleFast=false;
 function cancelScalePlayback(){
   scalePlayToken++;
   if(scaleSeqGain){try{scaleSeqGain.disconnect();}catch(e){}scaleSeqGain=null;}
@@ -886,8 +914,8 @@ function cancelScalePlayback(){
 function resetScaleButtons(){
   const asc=document.getElementById('btnScaleAsc'),desc=document.getElementById('btnScaleDesc');
   if(!asc||!desc) return;
-  asc.textContent='▶ Play Ascending';asc.className='btn-primary';asc.disabled=false;
-  desc.textContent='▼ Play Descending';desc.className='btn-secondary';desc.disabled=false;
+  asc.textContent='▶ Ascending';asc.className='btn-ghost';asc.disabled=false;
+  desc.textContent='▼ Descending';desc.className='btn-ghost';desc.disabled=false;
 }
 function setPlayingButton(dir){
   const asc=document.getElementById('btnScaleAsc'),desc=document.getElementById('btnScaleDesc');
@@ -910,12 +938,18 @@ function playSeq(notes,dir,bpm=100){
   });
   setTimeout(()=>{if(scalePlayToken!==token)return;bar.style.width='0%';cancelScalePlayback();},notes.length*gap*1000+300);
 }
-function playScaleAsc(){playSeq(getScaleNotes(),'asc');}
-function playScaleDesc(){playSeq([...getScaleNotes()].reverse(),'desc');}
+function toggleSpeed(){scaleFast=!scaleFast;document.getElementById('btnSpeed').textContent=scaleFast?'2×':'1×';savePref('scaleFast',scaleFast);}
+function playScaleAsc(){playSeq(getScaleNotes(),'asc',scaleFast?200:100);}
+function playScaleDesc(){playSeq([...getScaleNotes()].reverse(),'desc',scaleFast?200:100);}
 
 // ══ QUIZ ENTRY POINT ══
+function updateQuizButtons(){
+  var s=document.getElementById('btnStartQuiz'),r=document.getElementById('btnReplay');
+  if(s) s.style.display=quizActive?'none':'';
+  if(r) r.style.display=quizActive?'':'none';
+}
 function startQuiz(){
-  stopTimer();qAnswered=false;qVisWrong=0;render();
+  stopTimer();qAnswered=false;qVisWrong=0;quizActive=true;updateQuizButtons();render();
   document.getElementById('quizFeedback').textContent='';
   document.getElementById('quizFeedback').className='quiz-feedback';
   if(currentQuizMode==='notes') startNoteQuiz();
