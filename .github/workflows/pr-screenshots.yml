@@ -1,0 +1,105 @@
+name: PR Screenshots
+on:
+  pull_request:
+    branches: [main, dev]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.46.1
+          npx playwright install --with-deps chromium
+
+      - name: Start dev server
+        run: |
+          PORT=4173 node server.js &
+          echo $! > server.pid
+          sleep 3
+
+      - name: Capture screenshots
+        env:
+          BASE_URL: http://localhost:4173
+          SCREENSHOT_DIR: artifacts/screenshots
+        run: node .github/scripts/capture-screenshots.mjs
+
+      - name: Stop dev server
+        if: always()
+        run: |
+          if [ -f server.pid ]; then
+            kill "$(cat server.pid)"
+          fi
+
+      - name: Upload screenshots artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-screenshots
+          path: artifacts/screenshots
+          if-no-files-found: error
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const marker = '<!-- pr-screenshots -->';
+            const manifestPath = path.join(
+              process.env.GITHUB_WORKSPACE,
+              'artifacts',
+              'screenshots',
+              'manifest.json'
+            );
+            const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+            const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+            const files = manifest.pages
+              .map((entry) => `- ${entry.name}: ${entry.file}`)
+              .join('\n');
+            const body = [
+              marker,
+              '📸 **PR Screenshots**',
+              '',
+              'Screenshots generated for this PR:',
+              files,
+              '',
+              'Download the `pr-screenshots` artifact from the workflow run:',
+              runUrl,
+            ].join('\n');
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+            const existing = comments.find((comment) => comment.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body,
+              });
+            }
