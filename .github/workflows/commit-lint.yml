@@ -23,7 +23,7 @@ jobs:
           # Separate patterns with | (extended-regex alternation).
           IGNORE_PATTERN: "^Initial plan$|^Merge "
           # Commit author names or emails matching this pattern are treated as agent commits.
-          AGENT_AUTHOR_PATTERN: "(copilot|swe-agent|coding-agent)"
+          AGENT_AUTHOR_PATTERN: "(copilot-swe-agent\\[bot\\]|copilot\\[bot\\]|swe-agent\\[bot\\]|coding-agent\\[bot\\]|copilot@users\\.noreply\\.github\\.com)"
         run: |
           BASE_SHA=${{ github.event.pull_request.base.sha }}
           HEAD_SHA=${{ github.event.pull_request.head.sha }}
@@ -96,7 +96,7 @@ jobs:
               '- Summarise the key change in one sentence.',
             ].join('\n');
 
-            const { data: comments } = await github.rest.issues.listComments({
+            const comments = await github.paginate(github.rest.issues.listComments, {
               owner,
               repo,
               issue_number,
