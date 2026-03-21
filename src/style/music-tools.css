@@ -29,10 +29,6 @@
   --neu-flat:2px 2px 7px rgba(30,50,140,0.08),-1px -1px 5px rgba(255,255,255,0.94);
   --neu-deep:inset 4px 4px 12px rgba(25,45,130,0.13),inset -2px -2px 8px rgba(255,255,255,0.68);
   --surface2:var(--surface-lo); --muted:var(--text-3);
-  --font-h:'Syne',sans-serif; --font-b:'DM Mono',monospace; --r:18px; --br:10px;
-  --bar-bg:var(--surface); --pill-active:var(--accent); --pill-text:var(--bg);
-  --grad:linear-gradient(90deg,var(--accent),var(--accent2));
-  --overlay-bg:rgba(180,190,220,0.65); --overlay-surface:var(--surface-hi);
   --bg-grad:none;
 }
 
