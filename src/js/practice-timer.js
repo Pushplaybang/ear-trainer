@@ -667,7 +667,7 @@ function renderIndicators() {
       ? `var(--${SWATCH_VARS[b.colorIdx]})`
       : '';
 
-    return `<div class="${cls}" style="width:${w}px;background:${bgStyle}" title="${b.label || 'Block ' + (i + 1)}: ${b.duration}min"></div>`;
+    return `<div class="${cls}" style="width:${w}px;background:${bgStyle}" title="${escHtml(b.label || 'Block ' + (i + 1))}: ${b.duration}min"></div>`;
   }).join('');
 }
 
