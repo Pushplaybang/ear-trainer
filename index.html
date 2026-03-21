@@ -55,7 +55,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--bg-grad);pointer
 
 /* ── MODE TOGGLE ── */
 .mode-badge{font-family:var(--font-b,monospace);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
-.mode-toggle{width:48px;height:26px;border-radius:13px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;position:relative;flex-shrink:0;}
+.mode-toggle{width:48px;height:26px;border-radius:13px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;position:relative;flex-shrink:0;padding:0;appearance:none;-webkit-appearance:none;}
 .mode-toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:transform .3s,background .22s;}
 [data-mode="dark"] .mode-toggle::after{transform:translateX(22px);background:var(--accent);}
 
@@ -157,7 +157,7 @@ header p.sub{color:var(--text-hi);font-size:clamp(.62rem,.2rem + 1.5vw,.76rem);l
     </div>
     <span class="bar-sep"></span>
     <span class="mode-badge" id="modeBadge">DARK</span>
-    <div class="mode-toggle" id="modeToggle" title="Toggle dark / light mode"></div>
+    <button type="button" class="mode-toggle" id="modeToggle" aria-label="Toggle dark / light mode" aria-pressed="true"></button>
   </div>
 </div>
 
@@ -483,6 +483,8 @@ function applyMode(m, noSave) {
   document.body.dataset.mode = m;
   var badge = document.getElementById('modeBadge');
   if (badge) badge.textContent = m === 'dark' ? 'DARK' : 'LIGHT';
+  const toggle = document.getElementById('modeToggle');
+  if (toggle) toggle.setAttribute('aria-pressed', m === 'dark' ? 'true' : 'false');
   if (!noSave) saveTheme('mode', m);
   applyAccent(document.body.dataset.accent || loadTheme().accent || 'orange', true);
 }
